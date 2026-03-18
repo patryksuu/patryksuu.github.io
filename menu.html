@@ -9,19 +9,15 @@
 
   :root {
     --bg: #111113;
-    --surface: #18181b;
     --surface2: #1e1e22;
     --border: rgba(255,255,255,0.07);
-    --border-selected: rgba(255,255,255,0.25);
-    --accent: #ffffff;
-    --accent-left: #a0a0b0;
     --text: #f0f0f0;
     --text-dim: #6b6b7a;
     --text-mid: #9999aa;
     --selected-bg: #1e1e22;
     --selected-border: #ffffff;
     --arrow: #555560;
-    --arrow-selected: #cccccc;
+    --arrow-sel: #cccccc;
   }
 
   html, body {
@@ -35,8 +31,7 @@
   #app {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: flex-start;
     padding-left: 50px;
     pointer-events: none;
@@ -45,403 +40,395 @@
   }
 
   #app.visible { opacity: 1; }
+  #menu-stack { display: flex; align-items: flex-start; }
 
-  #menu-stack {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
-  }
-
-  /* ── Panel ── */
-  .menu-panel {
+  .panel {
     width: 260px;
     background: var(--bg);
+    border-right: 1px solid var(--border);
     position: relative;
     overflow: hidden;
-    border-right: 1px solid var(--border);
   }
 
-  .menu-panel.animate-in {
-    animation: panel-in 0.12s ease forwards;
-  }
+  .panel.animate-in { animation: pin 0.12s ease forwards; }
+  @keyframes pin { from { opacity:0; transform:translateX(-6px); } to { opacity:1; transform:translateX(0); } }
 
-  @keyframes panel-in {
-    from { opacity: 0; transform: translateX(-6px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-
-  /* ── Logo / Header ── */
-  .menu-logo {
-    padding: 20px 18px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .menu-logo-img {
-    width: 100%;
-    max-height: 80px;
-    object-fit: contain;
-    object-position: left center;
-    margin-bottom: 6px;
-    display: none; /* ukryte dopóki nie ma obrazka */
-  }
-
-  .menu-logo-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: 0.03em;
+  /* Header */
+  .panel-header { padding: 18px 16px 10px; }
+  .panel-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--text); letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-
-  .menu-logo-sub {
-    font-size: 10px;
-    font-weight: 400;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
+  .panel-sub {
+    font-size: 10px; color: var(--text-dim);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    margin-top: 2px;
   }
 
-  /* ── Divider ── */
-  .menu-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 0;
-  }
+  .panel-divider { height: 1px; background: var(--border); }
 
-  /* ── Items ── */
-  .menu-items {
-    padding: 4px 0;
-  }
+  /* Items */
+  .panel-items { padding: 4px 0; }
 
-  .menu-item {
-    position: relative;
-    display: flex;
-    align-items: center;
+  .item {
+    display: flex; align-items: center;
     padding: 0 16px 0 18px;
-    height: 44px;
-    cursor: default;
-    gap: 10px;
+    height: 42px; gap: 10px;
     border-left: 2px solid transparent;
-    transition: none;
   }
 
-  .menu-item.selected {
+  .item.selected {
     background: var(--selected-bg);
     border-left-color: var(--selected-border);
   }
 
   .item-label {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 500;
+    flex: 1; font-size: 13px; font-weight: 500;
     color: var(--text-dim);
-    letter-spacing: 0.01em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  .menu-item.selected .item-label {
-    color: var(--text);
+  .item.selected .item-label { color: var(--text); }
+
+  .item-right {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
   }
 
-  .item-arrow {
-    font-size: 11px;
-    color: var(--arrow);
-    flex-shrink: 0;
-    line-height: 1;
+  .item-value {
+    font-size: 11px; color: var(--text-mid);
+    max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  .menu-item.selected .item-arrow {
-    color: var(--arrow-selected);
+  .item-toggle {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.05em;
   }
+  .item-toggle.on  { color: #4ade80; }
+  .item-toggle.off { color: var(--text-dim); }
 
-  /* ── Separator ── */
-  .menu-sep {
-    height: 1px;
-    background: var(--border);
-    margin: 4px 0;
-  }
+  .item-arrow { font-size: 11px; color: var(--arrow); }
+  .item.selected .item-arrow { color: var(--arrow-sel); }
 
-  /* ── Footer ── */
-  .menu-footer {
+  .item-sep { height: 1px; background: var(--border); margin: 3px 0; }
+
+  /* Footer */
+  .panel-footer {
     border-top: 1px solid var(--border);
-    padding: 8px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    padding: 7px 14px;
+    display: flex; align-items: center; justify-content: space-between;
   }
 
   .footer-brand {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
+    font-size: 10px; color: var(--text-dim);
+    letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px;
   }
 
-  .footer-brand-icon {
-    width: 14px; height: 14px;
-    opacity: 0.4;
-  }
-
-  .footer-brand-icon svg {
-    width: 100%; height: 100%;
-    fill: var(--text-mid);
-  }
+  .footer-brand svg { width: 11px; height: 11px; fill: var(--text-dim); opacity: 0.5; }
 
   .footer-pages {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
+    font-size: 10px; color: var(--text-dim);
     background: var(--surface2);
-    padding: 2px 8px;
-    border-radius: 3px;
+    padding: 2px 7px;
   }
 
-  .footer-date {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-  }
+  .footer-date { font-size: 10px; color: var(--text-dim); }
 
-  /* ── Submenu panel (no logo, just items) ── */
-  .menu-panel.sub-panel .menu-logo {
-    padding: 14px 18px 10px;
-  }
-
-  .menu-panel.sub-panel .menu-logo-title {
-    font-size: 11px;
-    color: var(--text-mid);
-  }
-
-  /* ── Notification ── */
-  #notification {
+  /* Notification */
+  #notif {
     position: fixed; bottom: 28px; left: 50%;
     transform: translateX(-50%) translateY(10px);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-mid);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    padding: 7px 18px;
-    opacity: 0;
-    transition: opacity 0.15s, transform 0.15s;
-    pointer-events: none;
-    white-space: nowrap;
+    background: var(--bg); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-mid); font-size: 11px;
+    letter-spacing: 0.04em; padding: 7px 18px;
+    opacity: 0; transition: opacity 0.15s, transform 0.15s;
+    pointer-events: none; white-space: nowrap;
   }
-
-  #notification.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  #notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="menu-stack"></div>
-</div>
-<div id="notification"></div>
+<div id="app"><div id="menu-stack"></div></div>
+<div id="notif"></div>
 
 <script>
-const MENU_DATA = {
-  id: 'root', title: 'ALPRAZOLAM', subtitle: 'VERSION 1.0',
-  items: [
-    { label: 'Player', submenu: {
-        id: 'player', title: 'PLAYER', subtitle: 'Opcje gracza',
-        items: [
-          { label: 'Statystyki' }, { label: 'Leczenie' }, { label: 'Ekwipunek' },
-          { label: 'Wygląd', submenu: {
-              id: 'appearance', title: 'WYGLĄD', subtitle: 'Edycja postaci',
-              items: [{ label: 'Fryzura' }, { label: 'Ubranie' }, { label: 'Akcesoria' }]
-          }},
-          { label: 'Umiejętności' },
-        ]
-    }},
-    { label: 'Server', submenu: {
-        id: 'server', title: 'SERVER', subtitle: 'Opcje serwera',
-        items: [{ label: 'Gracze online' }, { label: 'Ogłoszenia' }, { label: 'Zasady' }]
-    }},
-    { label: 'Vehicle', submenu: {
-        id: 'vehicle', title: 'VEHICLE', subtitle: 'Zarządzanie pojazdem',
-        items: [{ label: 'Naprawa' }, { label: 'Paliwo' }, { label: 'Tuning' }, { label: 'Spawnuj pojazd' }]
-    }},
-    { label: 'Miscellaneous', submenu: {
-        id: 'misc', title: 'MISCELLANEOUS', subtitle: 'Różne',
-        items: [{ label: 'Teleport' }, { label: 'Czas i pogoda' }, { label: 'Animacje' }]
-    }},
-    { label: 'Settings' },
-  ]
-};
-
+// ─── State ────────────────────────────────────────────────────────────────────
+// stack = [{menuDef, selectedIndex, panelEl, itemEls}]
 let stack = [];
 let isVisible = false;
-const app = document.getElementById('app');
-const stackEl = document.getElementById('menu-stack');
-const notifEl = document.getElementById('notification');
+let rootDef = null; // set by 'load' message
 
+const app    = document.getElementById('app');
+const stackEl= document.getElementById('menu-stack');
+const notifEl= document.getElementById('notif');
+
+let notifTimer = null;
 function notify(msg) {
   notifEl.textContent = msg;
   notifEl.classList.add('show');
-  setTimeout(() => notifEl.classList.remove('show'), 1600);
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => notifEl.classList.remove('show'), 1800);
 }
 
-function selectableItems(menuDef) {
+// ─── Render ───────────────────────────────────────────────────────────────────
+function selectable(menuDef) {
   return menuDef.items.filter(i => i.type !== 'sep');
 }
 
-function totalPages() {
-  // zlicz wszystkie "strony" w drzewie menu (uproszczone)
-  return 5;
-}
-
-function renderPanel(menuDef, selectedIndex, animate = true, isRoot = false) {
+function renderPanel(menuDef, selectedIndex, isRoot, animate) {
   const panel = document.createElement('div');
-  panel.className = 'menu-panel' + (animate ? ' animate-in' : '') + (!isRoot ? ' sub-panel' : '');
+  panel.className = 'panel' + (animate ? ' animate-in' : '');
 
-  // Logo / header
-  const logo = document.createElement('div');
-  logo.className = 'menu-logo';
-  logo.innerHTML = `
-    <div class="menu-logo-title">${menuDef.title}</div>
-    <div class="menu-logo-sub">${menuDef.subtitle || ''}</div>
-  `;
-  panel.appendChild(logo);
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'panel-header';
+  hdr.innerHTML = `<div class="panel-title">${menuDef.title}</div>`
+    + (menuDef.subtitle ? `<div class="panel-sub">${menuDef.subtitle}</div>` : '');
+  panel.appendChild(hdr);
 
-  const divider = document.createElement('div');
-  divider.className = 'menu-divider';
-  panel.appendChild(divider);
+  panel.appendChild(Object.assign(document.createElement('div'), { className: 'panel-divider' }));
 
   // Items
-  const itemsEl = document.createElement('div');
-  itemsEl.className = 'menu-items';
+  const itemsWrap = document.createElement('div');
+  itemsWrap.className = 'panel-items';
+  const itemEls = []; // only selectables
   let si = -1;
-  menuDef.items.forEach(item => {
+
+  for (const item of menuDef.items) {
     if (item.type === 'sep') {
-      const sep = document.createElement('div');
-      sep.className = 'menu-sep';
-      itemsEl.appendChild(sep);
-      return;
+      itemsWrap.appendChild(Object.assign(document.createElement('div'), { className: 'item-sep' }));
+      continue;
     }
     si++;
+    const idx = si;
     const el = document.createElement('div');
-    el.className = 'menu-item' + (si === selectedIndex ? ' selected' : '');
-    const hasArrow = item.submenu;
-    el.innerHTML = `
-      <div class="item-label">${item.label}</div>
-      ${hasArrow ? `<div class="item-arrow">›</div>` : ''}
-    `;
-    itemsEl.appendChild(el);
-  });
-  panel.appendChild(itemsEl);
+    el.className = 'item' + (idx === selectedIndex ? ' selected' : '');
 
-  // Footer (tylko root panel)
-  if (isRoot) {
-    const footer = document.createElement('div');
-    footer.className = 'menu-footer';
-    const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(2)}`;
-    footer.innerHTML = `
-      <div class="footer-brand">
-        <div class="footer-brand-icon">
-          <svg viewBox="0 0 16 16"><path d="M8 1L1 5v6l7 4 7-4V5L8 1z"/></svg>
-        </div>
-        <span>menu</span>
-      </div>
-      <div class="footer-pages" id="footer-pages">1/1</div>
-      <div class="footer-date">${dateStr}</div>
-    `;
-    panel.appendChild(footer);
+    // right side
+    let rightHtml = '';
+    if (item.type === 'toggle') {
+      const state = item.value ? 'on' : 'off';
+      rightHtml = `<span class="item-toggle ${state}">${item.value ? 'ON' : 'OFF'}</span>`;
+    } else if (item.submenu || item.type === 'sub') {
+      if (item.value !== undefined) rightHtml += `<span class="item-value">${item.value}</span>`;
+      rightHtml += `<span class="item-arrow">›</span>`;
+    } else {
+      if (item.value !== undefined) rightHtml = `<span class="item-value">${item.value}</span>`;
+    }
+
+    el.innerHTML = `<div class="item-label">${item.label}</div><div class="item-right">${rightHtml}</div>`;
+    itemsWrap.appendChild(el);
+    itemEls.push({ el, item, idx });
   }
 
-  return panel;
+  panel.appendChild(itemsWrap);
+
+  // Footer (root only)
+  if (isRoot) {
+    const ft = document.createElement('div');
+    ft.className = 'panel-footer';
+    const now = new Date();
+    const d = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(2)}`;
+    const total = selectable(menuDef).length;
+    ft.innerHTML = `
+      <div class="footer-brand">
+        <svg viewBox="0 0 16 16"><path d="M8 1L1 5v6l7 4 7-4V5L8 1z"/></svg>
+        Patryksu
+      </div>
+      <div class="footer-pages" id="fp">${selectedIndex+1}/${total}</div>
+      <div class="footer-date">${d}</div>`;
+    panel.appendChild(ft);
+  }
+
+  return { panel, itemEls };
 }
 
-function redrawCurrent() {
+function updateSelection() {
   const frame = stack[stack.length - 1];
   if (!frame) return;
-  const items = frame.panelEl.querySelectorAll('.menu-item');
-  items.forEach((el, i) => {
-    el.classList.toggle('selected', i === frame.selectedIndex);
-  });
-  // Aktualizuj licznik stron
-  const fp = document.getElementById('footer-pages');
-  if (fp) {
-    const sel = frame.selectedIndex + 1;
-    const total = selectableItems(frame.menuDef).length;
-    fp.textContent = `${sel}/${total}`;
+  for (const { el, idx } of frame.itemEls) {
+    el.classList.toggle('selected', idx === frame.selectedIndex);
+    // update toggle display in-place
+    const item = frame.itemEls.find(x => x.idx === idx)?.item;
+    if (item && item.type === 'toggle') {
+      const t = el.querySelector('.item-toggle');
+      if (t) { t.className = `item-toggle ${item.value ? 'on' : 'off'}`; t.textContent = item.value ? 'ON' : 'OFF'; }
+    }
   }
+  // update footer counter
+  const fp = document.getElementById('fp');
+  if (fp) fp.textContent = `${frame.selectedIndex + 1}/${selectable(frame.menuDef).length}`;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function actionLoad(menuDef) {
+  rootDef = menuDef;
 }
 
 function actionShow() {
   isVisible = true;
   app.classList.add('visible');
-  if (stack.length === 0) {
-    const panelEl = renderPanel(MENU_DATA, 0, true, true);
-    stackEl.appendChild(panelEl);
-    stack.push({ menuDef: MENU_DATA, selectedIndex: 0, panelEl });
-    redrawCurrent();
+  if (stack.length === 0 && rootDef) {
+    const { panel, itemEls } = renderPanel(rootDef, 0, true, true);
+    stackEl.appendChild(panel);
+    stack.push({ menuDef: rootDef, selectedIndex: 0, panel, itemEls });
+    updateSelection();
   }
 }
 
 function actionHide() {
   isVisible = false;
   app.classList.remove('visible');
-  setTimeout(() => { stack.forEach(f => f.panelEl.remove()); stack = []; }, 200);
+  setTimeout(() => { stack.forEach(f => f.panel.remove()); stack = []; }, 160);
 }
 
-function actionNav(direction) {
-  if (!isVisible || stack.length === 0) return;
+function actionNav(dir) {
+  if (!isVisible || !stack.length) return;
   const frame = stack[stack.length - 1];
-  const items = selectableItems(frame.menuDef);
-  frame.selectedIndex = direction === 'up'
+  const items = selectable(frame.menuDef);
+  frame.selectedIndex = dir === 'up'
     ? (frame.selectedIndex - 1 + items.length) % items.length
     : (frame.selectedIndex + 1) % items.length;
-  redrawCurrent();
+  updateSelection();
 }
 
 function actionEnter() {
-  if (!isVisible || stack.length === 0) return;
+  if (!isVisible || !stack.length) return;
   const frame = stack[stack.length - 1];
-  const item = selectableItems(frame.menuDef)[frame.selectedIndex];
+  const item = selectable(frame.menuDef)[frame.selectedIndex];
   if (!item) return;
+
   if (item.submenu) {
-    const panelEl = renderPanel(item.submenu, 0, true, false);
-    stackEl.appendChild(panelEl);
-    stack.push({ menuDef: item.submenu, selectedIndex: 0, panelEl });
-    redrawCurrent();
+    const { panel, itemEls } = renderPanel(item.submenu, 0, false, true);
+    stackEl.appendChild(panel);
+    stack.push({ menuDef: item.submenu, selectedIndex: 0, panel, itemEls });
+    updateSelection();
+  } else if (item.type === 'toggle') {
+    // toggle state optimistically, Lua will confirm via 'update'
+    item.value = !item.value;
+    updateSelection();
+    // tell Lua which item was activated
+    sendToLua({ type: 'select', path: getPath() });
   } else {
-    notify(item.label);
+    sendToLua({ type: 'select', path: getPath() });
   }
 }
 
 function actionBack() {
-  if (!isVisible || stack.length === 0) return;
-  if (stack.length === 1) { actionHide(); return; }
+  if (!isVisible || !stack.length) return;
+  if (stack.length === 1) { actionHide(); sendToLua({ type: 'close' }); return; }
   const frame = stack.pop();
-  frame.panelEl.remove();
-  redrawCurrent();
+  frame.panel.remove();
+  updateSelection();
+}
+
+// Update a specific item's value/toggle from Lua
+function actionUpdate(path, value, label) {
+  // path = array of selectable indices, e.g. [0, 2]
+  // find item in rootDef and update it
+  let def = rootDef;
+  for (let i = 0; i < path.length - 1; i++) {
+    def = selectable(def)[path[i]].submenu;
+  }
+  const item = selectable(def)[path[path.length - 1]];
+  if (!item) return;
+  if (value !== undefined) item.value = value;
+  if (label !== undefined) item.label = label;
+  // re-render only the visible panel that contains this item
+  updateSelection();
+}
+
+function actionNotify(msg) { notify(msg); }
+
+// ─── Path helpers ─────────────────────────────────────────────────────────────
+function getPath() {
+  // returns array of selectedIndex per stack frame
+  return stack.map(f => f.selectedIndex);
+}
+
+// ─── Lua bridge ───────────────────────────────────────────────────────────────
+function sendToLua(data) {
+  // In FiveM DUI there's no fetch/PostMessage back to Lua directly,
+  // so we encode the action in the page title — Lua polls via MachoExecuteDuiScript
+  // OR we use a custom scheme. For simplicity we stash it in window.__luaQueue
+  if (!window.__luaQueue) window.__luaQueue = [];
+  window.__luaQueue.push(data);
 }
 
 window.addEventListener('message', e => {
   const d = e.data;
   if (!d || !d.type) return;
   switch (d.type) {
-    case 'show':     actionShow(); break;
-    case 'hide':     actionHide(); break;
-    case 'navigate': actionNav(d.direction); break;
-    case 'enter':    actionEnter(); break;
-    case 'back':     actionBack(); break;
+    case 'load':     actionLoad(d.menu);              break;
+    case 'show':     actionShow();                    break;
+    case 'hide':     actionHide();                    break;
+    case 'navigate': actionNav(d.direction);          break;
+    case 'enter':    actionEnter();                   break;
+    case 'back':     actionBack();                    break;
+    case 'update':   actionUpdate(d.path, d.value, d.label); break;
+    case 'notify':   actionNotify(d.msg);             break;
   }
 });
 
-if (!window.invokeNative) actionShow();
+// DEV: auto-show with sample data in browser
+if (!window.invokeNative) {
+  actionLoad({
+    title: 'PATRYKSU', subtitle: 'VERSION 1.0',
+    items: [
+      { label: 'Gracz', submenu: { title: 'GRACZ', subtitle: 'Opcje gracza', items: [
+        { label: 'Nieśmiertelność', type: 'toggle', value: false },
+        { label: 'Noclip',          type: 'toggle', value: false },
+        { label: 'Super skok',      type: 'toggle', value: false },
+        { label: 'God Mode txAdmin' },
+        { label: 'Ulecz gracza' },
+        { label: 'Napraw pojazd' },
+        { type: 'sep' },
+        { label: 'Skiny', submenu: { title: 'SKINY', subtitle: 'Zmień model', items: [
+          { label: 'Michael' }, { label: 'Franklin' }, { label: 'Trevor' },
+          { label: 'SWAT' }, { label: 'Jezus' }, { label: 'Zombie' },
+        ]}}
+      ]}},
+      { label: 'Pojazd', submenu: { title: 'POJAZD', subtitle: 'Zarządzanie', items: [
+        { label: 'Napraw pojazd' },
+        { label: 'Napraw silnik' },
+        { label: 'Usuń pojazd' },
+        { label: 'Obróć pojazd' },
+        { label: 'Max tuning' },
+        { label: 'Nieśmiertelność', type: 'toggle', value: false },
+        { label: 'Niewidzialność',  type: 'toggle', value: false },
+        { type: 'sep' },
+        { label: 'Boost', submenu: { title: 'BOOST', subtitle: 'Moc silnika', items: [
+          { label: '2x moc' }, { label: '4x moc' }, { label: '10x moc' },
+          { label: '16x moc' }, { label: 'Max moc' },
+        ]}},
+        { label: 'Zresp pojazd' },
+      ]}},
+      { label: 'ESP', submenu: { title: 'ESP', subtitle: 'Wizualizacja', items: [
+        { label: 'ESP włącz', type: 'toggle', value: true },
+        { label: 'Box',       type: 'toggle', value: false },
+        { label: 'Linie',     type: 'toggle', value: false },
+        { label: 'Info',      type: 'toggle', value: false },
+      ]}},
+      { label: 'Gracze online', submenu: { title: 'GRACZE', subtitle: 'Lista graczy', items: [
+        { label: '[1] Gracz_1', value: '12ms' },
+        { label: '[2] Gracz_2', value: '44ms' },
+        { label: '[3] Gracz_3', value: '8ms'  },
+      ]}},
+      { label: 'Teleport', submenu: { title: 'TELEPORT', subtitle: '', items: [
+        { label: 'Do znacznika' },
+        { label: 'Do pojazdu'   },
+        { label: 'Na współrzędne' },
+      ]}},
+      { label: 'Świat', submenu: { title: 'ŚWIAT', subtitle: '', items: [
+        { label: 'Tryb Jezusa', type: 'toggle', value: false },
+        { label: 'Magnes',      type: 'toggle', value: false },
+        { label: 'Znaczniki graczy', type: 'toggle', value: false },
+      ]}},
+      { label: 'Informacje' },
+    ]
+  });
+  actionShow();
+}
 </script>
 </body>
 </html>
