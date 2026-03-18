@@ -2,15 +2,12 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FiveM Menu</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0c0f;
     --surface: rgba(10, 14, 20, 0.92);
     --border: rgba(0, 220, 180, 0.18);
     --border-active: rgba(0, 220, 180, 0.65);
@@ -20,10 +17,7 @@
     --text: #d4e8e2;
     --text-dim: rgba(212, 232, 226, 0.45);
     --selected-bg: rgba(0, 220, 180, 0.1);
-    --selected-border: rgba(0, 220, 180, 0.7);
     --header-bg: rgba(0, 220, 180, 0.07);
-    --red: #ff4060;
-    --red-dim: rgba(255, 64, 96, 0.15);
   }
 
   html, body {
@@ -34,500 +28,235 @@
   }
 
   #app {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
+    display: flex; align-items: center;
     justify-content: flex-start;
     padding-left: 60px;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    opacity: 0; transition: opacity 0.2s ease;
   }
 
-  #app.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Stack container */
-  #menu-stack {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
-  }
+  #app.visible { opacity: 1; }
+  #menu-stack { display: flex; align-items: flex-start; }
 
   .menu-panel {
     width: 280px;
     background: var(--surface);
     border: 1px solid var(--border);
-    backdrop-filter: blur(16px) saturate(1.4);
-    -webkit-backdrop-filter: blur(16px) saturate(1.4);
-    position: relative;
-    overflow: hidden;
-    transform: translateX(0);
-    opacity: 1;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    backdrop-filter: blur(16px);
+    position: relative; overflow: hidden;
+    animation: panel-in 0.15s ease forwards;
   }
 
   .menu-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity: 0.6;
   }
 
   .menu-panel::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
+    content: ''; position: absolute; top: 0; left: 0;
     width: 2px; height: 100%;
     background: linear-gradient(180deg, var(--accent), transparent 60%);
     opacity: 0.5;
   }
 
-  /* Depth offset for stacked submenus */
-  .menu-panel:not(:first-child) {
-    margin-left: -1px;
-    border-left-color: var(--border-active);
-  }
+  .menu-panel:not(:first-child) { margin-left: -1px; border-left-color: var(--border-active); }
 
-  /* Scanline overlay */
-  .menu-panel .scanlines {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.04) 2px,
-      rgba(0,0,0,0.04) 4px
-    );
-    pointer-events: none;
-    z-index: 10;
+  .scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    pointer-events: none; z-index: 10;
   }
 
   .menu-header {
-    background: var(--header-bg);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 14px 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    background: var(--header-bg); border-bottom: 1px solid var(--border);
+    padding: 10px 14px 8px; display: flex; align-items: center; gap: 10px;
   }
 
   .menu-header .icon {
-    width: 22px; height: 22px;
-    border: 1px solid var(--accent);
+    width: 22px; height: 22px; border: 1px solid var(--accent);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    position: relative;
+    flex-shrink: 0; position: relative;
   }
 
-  .menu-header .icon::before {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    background: var(--accent);
-    opacity: 0.15;
-  }
-
-  .menu-header .icon svg {
-    width: 12px; height: 12px;
-    fill: var(--accent);
-    position: relative;
-  }
-
-  .menu-header-text {
-    flex: 1;
-    min-width: 0;
-  }
+  .menu-header .icon::before { content: ''; position: absolute; inset: 2px; background: var(--accent); opacity: 0.15; }
+  .menu-header .icon svg { width: 12px; height: 12px; fill: var(--accent); position: relative; }
 
   .menu-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-family: 'Share Tech Mono', monospace;
-    line-height: 1;
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace; line-height: 1;
   }
 
-  .menu-subtitle {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    margin-top: 2px;
-    font-weight: 500;
-  }
+  .menu-title::after { content: '_'; animation: blink 1.2s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .menu-subtitle { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; margin-top: 2px; }
 
   .menu-breadcrumb {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    padding: 4px 14px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim);
+    letter-spacing: 0.08em; padding: 4px 14px;
+    border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  .menu-breadcrumb span {
-    color: var(--accent);
-    opacity: 0.7;
-  }
-
-  /* Items */
-  .menu-items {
-    padding: 4px 0;
-    max-height: 400px;
-    overflow: hidden;
-  }
+  .menu-breadcrumb span { color: var(--accent); opacity: 0.7; }
+  .menu-items { padding: 4px 0; }
 
   .menu-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    height: 36px;
-    cursor: default;
-    transition: background 0.1s ease;
-    user-select: none;
-    gap: 10px;
+    position: relative; display: flex; align-items: center;
+    padding: 0 12px; height: 36px; gap: 10px;
   }
 
   .menu-item::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 2px;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.1s ease;
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent); opacity: 0;
   }
 
-  .menu-item.selected {
-    background: var(--selected-bg);
-  }
+  .menu-item.selected { background: var(--selected-bg); }
+  .menu-item.selected::before { opacity: 1; }
 
-  .menu-item.selected::before {
-    opacity: 1;
-  }
-
-  .item-selector {
-    width: 6px; height: 6px;
-    border: 1px solid var(--text-dim);
-    flex-shrink: 0;
-    transition: all 0.1s ease;
-    position: relative;
-  }
+  .item-selector { width: 6px; height: 6px; border: 1px solid var(--text-dim); flex-shrink: 0; }
 
   .menu-item.selected .item-selector {
-    border-color: var(--accent);
-    background: var(--accent);
+    border-color: var(--accent); background: var(--accent);
     box-shadow: 0 0 6px var(--accent-glow);
   }
 
   .item-label {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-    transition: color 0.1s ease;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    flex: 1; font-size: 13px; font-weight: 600; color: var(--text-dim);
+    letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  .menu-item.selected .item-label {
-    color: var(--text);
-  }
-
-  .item-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
+  .menu-item.selected .item-label { color: var(--text); }
+  .item-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
   .item-badge {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    padding: 1px 5px;
-    border: 1px solid;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 1px 5px;
+    border: 1px solid var(--border-active); color: var(--accent);
+    background: var(--accent-dim); letter-spacing: 0.06em; text-transform: uppercase;
   }
 
-  .item-badge.sub {
-    color: var(--accent);
-    border-color: var(--border-active);
-    background: var(--accent-dim);
-  }
+  .item-arrow { color: var(--text-dim); font-size: 10px; }
+  .menu-item.selected .item-arrow { color: var(--accent); }
 
-  .item-arrow {
-    color: var(--text-dim);
-    font-size: 10px;
-    transition: color 0.1s ease, transform 0.15s ease;
-  }
-
-  .menu-item.selected .item-arrow {
-    color: var(--accent);
-    transform: translateX(2px);
-  }
-
-  /* Separator */
-  .menu-sep {
-    height: 1px;
-    background: var(--border);
-    margin: 4px 12px;
-    position: relative;
-  }
+  .menu-sep { height: 1px; background: var(--border); margin: 4px 12px; position: relative; }
 
   .menu-sep::before {
-    content: attr(data-label);
-    position: absolute;
-    top: -8px;
-    left: 0;
-    font-size: 9px;
-    color: var(--text-dim);
+    content: attr(data-label); position: absolute; top: -8px; left: 0;
+    font-size: 9px; color: var(--text-dim);
     font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    background: var(--surface);
-    padding-right: 6px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--surface); padding-right: 6px;
   }
 
-  /* Footer */
   .menu-footer {
-    border-top: 1px solid var(--border);
-    padding: 6px 12px;
-    display: flex;
-    justify-content: space-between;
-    background: rgba(0,0,0,0.25);
+    border-top: 1px solid var(--border); padding: 6px 12px;
+    display: flex; justify-content: space-between; background: rgba(0,0,0,0.25);
   }
 
   .key-hint {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    font-family: 'Share Tech Mono', monospace;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px; color: var(--text-dim);
+    letter-spacing: 0.06em; font-family: 'Share Tech Mono', monospace;
   }
 
   .key-hint kbd {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 8px;
-    padding: 1px 5px;
-    border: 1px solid rgba(212,232,226,0.2);
-    background: rgba(255,255,255,0.04);
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
+    font-family: 'Share Tech Mono', monospace; font-size: 8px; padding: 1px 5px;
+    border: 1px solid rgba(212,232,226,0.2); background: rgba(255,255,255,0.04); color: var(--text-dim);
   }
 
-  /* Cursor flash animation */
-  @keyframes cursor-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
+  @keyframes panel-in { 0%{opacity:0;transform:translateX(-8px)} 100%{opacity:1;transform:translateX(0)} }
 
-  .menu-title::after {
-    content: '_';
-    animation: cursor-blink 1.2s step-end infinite;
-    color: var(--accent);
-  }
-
-  /* Notification */
   #notification {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
+    position: fixed; bottom: 30px; left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--surface);
-    border: 1px solid var(--border-active);
-    color: var(--accent);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    padding: 8px 20px;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
-    white-space: nowrap;
-    text-transform: uppercase;
+    background: var(--surface); border: 1px solid var(--border-active);
+    color: var(--accent); font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; padding: 8px 20px;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; white-space: nowrap; text-transform: uppercase;
   }
 
-  #notification.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Glitch on open */
-  @keyframes panel-in {
-    0% { opacity: 0; transform: translateX(-8px) skewX(-1deg); }
-    60% { opacity: 1; transform: translateX(1px) skewX(0.2deg); }
-    100% { opacity: 1; transform: translateX(0) skewX(0); }
-  }
-
-  .menu-panel.animate-in {
-    animation: panel-in 0.18s ease forwards;
-  }
-
-  @keyframes panel-out {
-    0% { opacity: 1; transform: translateX(0); }
-    100% { opacity: 0; transform: translateX(-6px); }
-  }
-
-  .menu-panel.animate-out {
-    animation: panel-out 0.12s ease forwards;
-  }
+  #notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-
 <div id="app">
   <div id="menu-stack"></div>
 </div>
-
 <div id="notification"></div>
 
 <script>
-// ─── Menu structure ───────────────────────────────────────────────────────────
 const MENU_DATA = {
-  id: 'root',
-  title: 'GŁÓWNE MENU',
-  subtitle: 'Panel sterowania',
+  id: 'root', title: 'GŁÓWNE MENU', subtitle: 'Panel sterowania',
   items: [
-    {
-      label: 'Gracz',
-      badge: 'SUB',
-      submenu: {
-        id: 'player',
-        title: 'GRACZ',
-        subtitle: 'Opcje gracza',
+    { label: 'Gracz', badge: 'SUB', submenu: {
+        id: 'player', title: 'GRACZ', subtitle: 'Opcje gracza',
         items: [
-          { label: 'Statystyki' },
-          { label: 'Leczenie' },
-          { label: 'Ekwipunek' },
-          { label: 'Wygląd',
-            badge: 'SUB',
-            submenu: {
-              id: 'appearance',
-              title: 'WYGLĄD',
-              subtitle: 'Edycja postaci',
-              items: [
-                { label: 'Fryzura' },
-                { label: 'Ubranie' },
-                { label: 'Akcesoria' },
-              ]
-            }
-          },
+          { label: 'Statystyki' }, { label: 'Leczenie' }, { label: 'Ekwipunek' },
+          { label: 'Wygląd', badge: 'SUB', submenu: {
+              id: 'appearance', title: 'WYGLĄD', subtitle: 'Edycja postaci',
+              items: [{ label: 'Fryzura' }, { label: 'Ubranie' }, { label: 'Akcesoria' }]
+          }},
           { label: 'Umiejętności' },
         ]
-      }
-    },
-    {
-      label: 'Pojazd',
-      badge: 'SUB',
-      submenu: {
-        id: 'vehicle',
-        title: 'POJAZD',
-        subtitle: 'Zarządzanie pojazdem',
-        items: [
-          { label: 'Naprawa' },
-          { label: 'Paliwo' },
-          { label: 'Tuning' },
-          { label: 'Spawnuj pojazd' },
-        ]
-      }
-    },
+    }},
+    { label: 'Pojazd', badge: 'SUB', submenu: {
+        id: 'vehicle', title: 'POJAZD', subtitle: 'Zarządzanie pojazdem',
+        items: [{ label: 'Naprawa' }, { label: 'Paliwo' }, { label: 'Tuning' }, { label: 'Spawnuj pojazd' }]
+    }},
     { type: 'sep', label: 'Ogólne' },
-    { label: 'Teleport' },
-    { label: 'Czas i pogoda' },
-    { label: 'Ustawienia' },
+    { label: 'Teleport' }, { label: 'Czas i pogoda' }, { label: 'Ustawienia' },
     { type: 'sep', label: 'Sesja' },
     { label: 'Zamknij menu' },
   ]
 };
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let stack = []; // [{menuDef, selectedIndex, panelEl}]
+let stack = [];
 let isVisible = false;
-
-// ─── DOM Helpers ─────────────────────────────────────────────────────────────
 const app = document.getElementById('app');
 const stackEl = document.getElementById('menu-stack');
 const notifEl = document.getElementById('notification');
 
-function notify(msg, duration = 1800) {
+function notify(msg) {
   notifEl.textContent = msg;
   notifEl.classList.add('show');
-  setTimeout(() => notifEl.classList.remove('show'), duration);
+  setTimeout(() => notifEl.classList.remove('show'), 1800);
 }
 
 function selectableItems(menuDef) {
   return menuDef.items.filter(i => i.type !== 'sep');
 }
 
-function realIndex(menuDef, selectIdx) {
-  let count = -1;
-  for (let i = 0; i < menuDef.items.length; i++) {
-    if (menuDef.items[i].type !== 'sep') count++;
-    if (count === selectIdx) return i;
-  }
-  return 0;
-}
-
-// ─── Render ───────────────────────────────────────────────────────────────────
-function renderPanel(menuDef, selectedIndex, animate = true) {
+function renderPanel(menuDef, selectedIndex) {
   const panel = document.createElement('div');
-  panel.className = 'menu-panel' + (animate ? ' animate-in' : '');
+  panel.className = 'menu-panel';
+  panel.innerHTML = '<div class="scanlines"></div>';
 
-  // Scanlines
-  const scanlines = document.createElement('div');
-  scanlines.className = 'scanlines';
-  panel.appendChild(scanlines);
-
-  // Header
   const header = document.createElement('div');
   header.className = 'menu-header';
   header.innerHTML = `
     <div class="icon">
       <svg viewBox="0 0 12 12"><rect x="1" y="1" width="4" height="4"/><rect x="7" y="1" width="4" height="4"/><rect x="1" y="7" width="4" height="4"/><rect x="7" y="7" width="4" height="4"/></svg>
     </div>
-    <div class="menu-header-text">
+    <div>
       <div class="menu-title">${menuDef.title}</div>
       ${menuDef.subtitle ? `<div class="menu-subtitle">${menuDef.subtitle}</div>` : ''}
-    </div>
-  `;
+    </div>`;
   panel.appendChild(header);
 
-  // Breadcrumb
-  const breadcrumb = document.createElement('div');
-  breadcrumb.className = 'menu-breadcrumb';
+  const bc = document.createElement('div');
+  bc.className = 'menu-breadcrumb';
   const trail = stack.map(s => s.menuDef.title).concat([menuDef.title]);
-  breadcrumb.innerHTML = trail.map((t, i) =>
-    i < trail.length - 1
-      ? `<span>${t}</span> › `
-      : t
-  ).join('');
-  panel.appendChild(breadcrumb);
+  bc.innerHTML = trail.map((t, i) => i < trail.length - 1 ? `<span>${t}</span> › ` : t).join('');
+  panel.appendChild(bc);
 
-  // Items
   const itemsEl = document.createElement('div');
   itemsEl.className = 'menu-items';
-
-  let selectableCount = -1;
+  let si = -1;
   menuDef.items.forEach(item => {
     if (item.type === 'sep') {
       const sep = document.createElement('div');
@@ -536,157 +265,103 @@ function renderPanel(menuDef, selectedIndex, animate = true) {
       itemsEl.appendChild(sep);
       return;
     }
-
-    selectableCount++;
-    const idx = selectableCount;
-
+    si++;
     const el = document.createElement('div');
-    el.className = 'menu-item' + (idx === selectedIndex ? ' selected' : '');
-    el.dataset.index = idx;
-
+    el.className = 'menu-item' + (si === selectedIndex ? ' selected' : '');
     el.innerHTML = `
       <div class="item-selector"></div>
       <div class="item-label">${item.label}</div>
       <div class="item-right">
-        ${item.badge ? `<span class="item-badge sub">${item.badge}</span>` : ''}
+        ${item.badge ? `<span class="item-badge">${item.badge}</span>` : ''}
         ${item.submenu ? `<span class="item-arrow">▶</span>` : ''}
-      </div>
-    `;
+      </div>`;
     itemsEl.appendChild(el);
   });
-
   panel.appendChild(itemsEl);
 
-  // Footer
   const footer = document.createElement('div');
   footer.className = 'menu-footer';
   const isRoot = stack.length === 0;
   footer.innerHTML = `
     <div class="key-hint"><kbd>↑↓</kbd> nawigacja</div>
     <div class="key-hint"><kbd>ENTER</kbd> wybierz</div>
-    <div class="key-hint"><kbd>${isRoot ? 'F5' : 'BKSP'}</kbd> ${isRoot ? 'zamknij' : 'wstecz'}</div>
-  `;
+    <div class="key-hint"><kbd>${isRoot ? 'F5' : 'BKSP'}</kbd> ${isRoot ? 'zamknij' : 'wstecz'}</div>`;
   panel.appendChild(footer);
-
   return panel;
 }
 
-function getCurrentFrame() {
-  return stack[stack.length - 1];
-}
-
-function redrawCurrentPanel() {
-  const frame = getCurrentFrame();
-  const newPanel = renderPanel(frame.menuDef, frame.selectedIndex, false);
+function redrawCurrent() {
+  const frame = stack[stack.length - 1];
+  if (!frame) return;
+  const newPanel = renderPanel(frame.menuDef, frame.selectedIndex);
   stackEl.replaceChild(newPanel, frame.panelEl);
   frame.panelEl = newPanel;
 }
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
-function openMenu() {
-  if (stack.length > 0) return;
-  const panelEl = renderPanel(MENU_DATA, 0, true);
-  stackEl.appendChild(panelEl);
-  stack.push({ menuDef: MENU_DATA, selectedIndex: 0, panelEl });
+function actionShow() {
+  isVisible = true;
+  app.classList.add('visible');
+  if (stack.length === 0) {
+    const panelEl = renderPanel(MENU_DATA, 0);
+    stackEl.appendChild(panelEl);
+    stack.push({ menuDef: MENU_DATA, selectedIndex: 0, panelEl });
+  }
 }
 
-function closeAllMenus() {
-  stack.forEach(f => {
-    f.panelEl.classList.remove('animate-in');
-    f.panelEl.classList.add('animate-out');
-    setTimeout(() => f.panelEl.remove(), 130);
-  });
-  stack = [];
+function actionHide() {
+  isVisible = false;
+  app.classList.remove('visible');
+  setTimeout(() => { stack.forEach(f => f.panelEl.remove()); stack = []; }, 200);
 }
 
-function navUp() {
-  const frame = getCurrentFrame();
+function actionNav(direction) {
+  if (!isVisible || stack.length === 0) return;
+  const frame = stack[stack.length - 1];
   const items = selectableItems(frame.menuDef);
-  frame.selectedIndex = (frame.selectedIndex - 1 + items.length) % items.length;
-  redrawCurrentPanel();
+  frame.selectedIndex = direction === 'up'
+    ? (frame.selectedIndex - 1 + items.length) % items.length
+    : (frame.selectedIndex + 1) % items.length;
+  redrawCurrent();
 }
 
-function navDown() {
-  const frame = getCurrentFrame();
-  const items = selectableItems(frame.menuDef);
-  frame.selectedIndex = (frame.selectedIndex + 1) % items.length;
-  redrawCurrentPanel();
-}
-
-function navEnter() {
-  const frame = getCurrentFrame();
-  const items = selectableItems(frame.menuDef);
-  const item = items[frame.selectedIndex];
+function actionEnter() {
+  if (!isVisible || stack.length === 0) return;
+  const frame = stack[stack.length - 1];
+  const item = selectableItems(frame.menuDef)[frame.selectedIndex];
   if (!item) return;
-
   if (item.submenu) {
-    // Push submenu
-    const panelEl = renderPanel(item.submenu, 0, true);
+    const panelEl = renderPanel(item.submenu, 0);
     stackEl.appendChild(panelEl);
     stack.push({ menuDef: item.submenu, selectedIndex: 0, panelEl });
   } else if (item.label === 'Zamknij menu') {
-    setVisible(false);
+    actionHide();
   } else {
     notify(`▶ ${item.label}`);
   }
 }
 
-function navBack() {
-  if (stack.length <= 1) {
-    setVisible(false);
-    return;
-  }
+function actionBack() {
+  if (!isVisible || stack.length === 0) return;
+  if (stack.length === 1) { actionHide(); return; }
   const frame = stack.pop();
-  frame.panelEl.classList.remove('animate-in');
-  frame.panelEl.classList.add('animate-out');
-  setTimeout(() => frame.panelEl.remove(), 120);
+  frame.panelEl.remove();
 }
 
-// ─── Visibility ───────────────────────────────────────────────────────────────
-function setVisible(v) {
-  isVisible = v;
-  if (v) {
-    app.classList.add('visible');
-    if (stack.length === 0) openMenu();
-  } else {
-    app.classList.remove('visible');
-    setTimeout(() => closeAllMenus(), 200);
-  }
-}
-
-// ─── Keyboard ─────────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'F5') {
-    e.preventDefault();
-    setVisible(!isVisible);
-    return;
-  }
-  if (!isVisible) return;
-  switch (e.key) {
-    case 'ArrowUp':   e.preventDefault(); navUp();    break;
-    case 'ArrowDown': e.preventDefault(); navDown();  break;
-    case 'Enter':     e.preventDefault(); navEnter(); break;
-    case 'Backspace': e.preventDefault(); navBack();  break;
-  }
-});
-
-// ─── FiveM message bridge ─────────────────────────────────────────────────────
+// Wiadomości z Lua
 window.addEventListener('message', e => {
-  const data = e.data;
-  if (!data || !data.type) return;
-
-  switch (data.type) {
-    case 'show':
-      setVisible(true);
-      break;
-    case 'hide':
-      setVisible(false);
-      break;
-    case 'toggle':
-      setVisible(!isVisible);
-      break;
+  const d = e.data;
+  if (!d || !d.type) return;
+  switch (d.type) {
+    case 'show':     actionShow(); break;
+    case 'hide':     actionHide(); break;
+    case 'navigate': actionNav(d.direction); break;
+    case 'enter':    actionEnter(); break;
+    case 'back':     actionBack(); break;
   }
 });
+
+// DEV: auto-show w przeglądarce
+if (!window.invokeNative) actionShow();
 </script>
 </body>
 </html>
