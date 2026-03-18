@@ -296,9 +296,11 @@ function renderPanel(menuDef, selectedIndex, animate = true) {
 function redrawCurrent() {
   const frame = stack[stack.length - 1];
   if (!frame) return;
-  const newPanel = renderPanel(frame.menuDef, frame.selectedIndex, false);
-  stackEl.replaceChild(newPanel, frame.panelEl);
-  frame.panelEl = newPanel;
+  // Tylko aktualizuj klasy selected — bez dotykania reszty DOM
+  const items = frame.panelEl.querySelectorAll('.menu-item');
+  items.forEach((el, i) => {
+    el.classList.toggle('selected', i === frame.selectedIndex);
+  });
 }
 
 function actionShow() {
