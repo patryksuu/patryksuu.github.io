@@ -46,6 +46,9 @@
     border: 1px solid var(--border);
     backdrop-filter: blur(16px);
     position: relative; overflow: hidden;
+  }
+
+  .menu-panel.animate-in {
     animation: panel-in 0.15s ease forwards;
   }
 
@@ -231,9 +234,9 @@ function selectableItems(menuDef) {
   return menuDef.items.filter(i => i.type !== 'sep');
 }
 
-function renderPanel(menuDef, selectedIndex) {
+function renderPanel(menuDef, selectedIndex, animate = true) {
   const panel = document.createElement('div');
-  panel.className = 'menu-panel';
+  panel.className = 'menu-panel' + (animate ? ' animate-in' : '');
   panel.innerHTML = '<div class="scanlines"></div>';
 
   const header = document.createElement('div');
@@ -293,7 +296,7 @@ function renderPanel(menuDef, selectedIndex) {
 function redrawCurrent() {
   const frame = stack[stack.length - 1];
   if (!frame) return;
-  const newPanel = renderPanel(frame.menuDef, frame.selectedIndex);
+  const newPanel = renderPanel(frame.menuDef, frame.selectedIndex, false);
   stackEl.replaceChild(newPanel, frame.panelEl);
   frame.panelEl = newPanel;
 }
