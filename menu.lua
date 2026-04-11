@@ -7,15 +7,6 @@ local esp = true
 local txNoclip = false
 local txGodMode = false
 local txSuperJump = false
-local fcShootCar = false
-local fcBlackhole = false
-local fcKickVehicle = false
-local fcDeleteVehicle = false
-local fcFuckVehicle = false
-local fcRCCar = false
-local discordrpc = true
-local ra_fc = {r = 255, g = 255, b = 255, a = 255}
-local bg_fc = {r = 0, g = 0, b = 0, a = 150}
 local LR = {}
 local a = true
 local b = {}
@@ -58,54 +49,7 @@ local function RGB(frequency)
 
   return result
 end
-local PlayerPingCache = {}
-local LastUpdate = 0
-local UpdateInterval = 10000 -- 10 sekund
 
-local function FetchPlayerList()
-    local endpoint = GetCurrentServerEndpoint()
-    if not endpoint then return end
-
-    local url = "http://" .. endpoint .. "/players.json"
-    local response = nil
-
-    -- Susano
-    if Susano then
-        local code, body = Susano.HttpGet(url)
-        if code == 200 and body then
-            response = body
-            print("Susano.HttpGet")
-        end
-
-    -- Macho
-    elseif MachoWebRequest then
-        local body = MachoWebRequest(url)
-        if body then
-            response = body
-            print("MachoWebRequest")
-        end
-    -- None
-    else
-      response = "?"
-    end 
-    
-    if response then
-        local decoded = json.decode(response)
-        if decoded then
-            PlayerPingCache = {}
-            for _, player in pairs(decoded) do
-                PlayerPingCache[player.id] = player.ping
-            end
-        end
-    end
-end
-
-local function UpdatePlayerCache()
-    if GetGameTimer() - LastUpdate > UpdateInterval then
-        LastUpdate = GetGameTimer()
-        FetchPlayerList()
-    end
-end
 local menus = {}
 local keys = {
     up     = {172, 241},
@@ -962,13 +906,6 @@ menus[id].y = 0.15
       return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, math.sin(retx))
     end
 
-    function GetRightVector(rotation)
-        local retz = math.rad(rotation.z + 90.0)
-        local retx = math.rad(rotation.x)
-        local absx = math.abs(math.cos(retx))
-        return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, 0.0)
-    end
-
     local function GetCamDirection()
       local heading = GetGameplayCamRelativeHeading()+GetEntityHeading(GetPlayerPed(-1))
       local pitch = GetGameplayCamRelativePitch()
@@ -1277,8 +1214,8 @@ menus[id].y = 0.15
     local CarTypes = {"Boats", "Commercial", "Compacts", "Coupes", "Cycles", "Emergency", "Helictopers", "Industrial", "Military", "Motorcycles", "Muscle", "Off-Road", "Planes", "SUVs", "Sedans", "Service", "Sports", "Sports Classic", "Super", "Trailer", "Trains", "Utility", "Vans"}
     local CarsArray = { boats, Commercial, Compacts, Coupes, cycles, Emergency, Helicopters, Industrial, Military, Motorcycles, muscle, OffRoad, Planes, SUVs, Sedans, Service, Sports, SportsClassic, Super, Trailer, trains, Utility, Vans}
     local Trailers = { "ArmyTanker", "ArmyTrailer", "ArmyTrailer2", "BaleTrailer", "BoatTrailer", "CableCar", "DockTrailer", "Graintrailer", "Proptrailer", "Raketailer", "TR2", "TR3", "TR4", "TRFlat", "TVTrailer", "Tanker", "Tanker2", "Trailerlogs", "Trailersmall", "Trailers", "Trailers2", "Trailers3"}
-    local allWeapons={"WEAPON_KNIFE","WEAPON_KNUCKLE","WEAPON_NIGHTSTICK","WEAPON_HAMMER","WEAPON_BAT","WEAPON_GOLFCLUB","WEAPON_CROWBAR","WEAPON_BOTTLE","WEAPON_DAGGER","WEAPON_HATCHET","WEAPON_MACHETE","WEAPON_FLASHLIGHT","WEAPON_SWITCHBLADE","WEAPON_PISTOL","WEAPON_PISTOL_MK2","WEAPON_COMBATPISTOL","WEAPON_APPISTOL","WEAPON_PISTOL50","WEAPON_SNSPISTOL","WEAPON_HEAVYPISTOL","WEAPON_VINTAGEPISTOL","WEAPON_STUNGUN","WEAPON_FLAREGUN","WEAPON_MARKSMANPISTOL","WEAPON_REVOLVER","WEAPON_MICROSMG","WEAPON_SMG","WEAPON_SMG_MK2","WEAPON_ASSAULTSMG","WEAPON_MG","WEAPON_COMBATMG","WEAPON_COMBATMG_MK2","WEAPON_COMBATPDW","WEAPON_GUSENBERG","WEAPON_MACHINEPISTOL","WEAPON_ASSAULTRIFLE","WEAPON_ASSAULTRIFLE_MK2","WEAPON_CARBINERIFLE","WEAPON_CARBINERIFLE_MK2","WEAPON_ADVANCEDRIFLE","WEAPON_SPECIALCARBINE","WEAPON_BULLPUPRIFLE","WEAPON_COMPACTRIFLE","WEAPON_PUMPSHOTGUN","WEAPON_SAWNOFFSHOTGUN","WEAPON_BULLPUPSHOTGUN","WEAPON_ASSAULTSHOTGUN","WEAPON_MUSKET","WEAPON_HEAVYSHOTGUN","WEAPON_DBSHOTGUN","WEAPON_SNIPERRIFLE","WEAPON_HEAVYSNIPER","WEAPON_HEAVYSNIPER_MK2","WEAPON_MARKSMANRIFLE","WEAPON_GRENADELAUNCHER","WEAPON_EMPLAUNCHER","WEAPON_GRENADELAUNCHER_SMOKE","WEAPON_RPG","WEAPON_STINGER","WEAPON_FIREWORK","WEAPON_HOMINGLAUNCHER","WEAPON_GRENADE","WEAPON_STICKYBOMB","WEAPON_PROXMINE","WEAPON_BZGAS","WEAPON_SMOKEGRENADE","WEAPON_MOLOTOV","WEAPON_FIREEXTINGUISHER","WEAPON_PETROLCAN","WEAPON_SNOWBALL","WEAPON_FLARE","WEAPON_BALL"}
-    local l_weapons={Melee={BaseballBat={id="weapon_bat",name="~r~> ~s~Baseball Bat",bInfAmmo=false,mods={}},BrokenBottle={id="weapon_bottle",name="~r~> ~s~Broken Bottle",bInfAmmo=false,mods={}},Crowbar={id="weapon_Crowbar",name="~r~> ~s~Crowbar",bInfAmmo=false,mods={}},Flashlight={id="weapon_flashlight",name="~r~> ~s~Flashlight",bInfAmmo=false,mods={}},GolfClub={id="weapon_golfclub",name="~r~> ~s~Golf Club",bInfAmmo=false,mods={}},BrassKnuckles={id="weapon_knuckle",name="~r~> ~s~Brass Knuckles",bInfAmmo=false,mods={}},Knife={id="weapon_knife",name="~r~> ~s~Knife",bInfAmmo=false,mods={}},Machete={id="weapon_machete",name="~r~> ~s~Machete",bInfAmmo=false,mods={}},Switchblade={id="weapon_switchblade",name="~r~> ~s~Switchblade",bInfAmmo=false,mods={}},Nightstick={id="weapon_nightstick",name="~r~> ~s~Nightstick",bInfAmmo=false,mods={}},BattleAxe={id="weapon_battleaxe",name="~r~> ~s~Battle Axe",bInfAmmo=false,mods={}}},Handguns={Pistol={id="weapon_pistol",name="~r~> ~s~Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},PistolMK2={id="weapon_pistol_mk2",name="~r~> ~s~Pistol MK 2",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_PISTOL_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_PISTOL_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_PISTOL_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_PISTOL_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Mounted Scope",id="COMPONENT_AT_PI_RAIL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH_02"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP"},{name="~r~> ~s~Suppessor",id="COMPONENT_AT_PI_SUPP_02"}}}},CombatPistol={id="weapon_combatpistol",name="Combat Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},APPistol={id="weapon_appistol",name="AP Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_APPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_APPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},StunGun={id="weapon_stungun",name="~r~> ~s~Stun Gun",bInfAmmo=false,mods={}},Pistol50={id="weapon_pistol50",name="~r~> ~s~Pistol .50",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL50_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL50_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},SNSPistol={id="weapon_snspistol",name="~r~> ~s~SNS Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SNSPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SNSPISTOL_CLIP_02"}}}},SNSPistolMkII={id="weapon_snspistol_mk2",name="~r~> ~s~SNS Pistol Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SNSPISTOL_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SNSPISTOL_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Mounted Scope",id="COMPONENT_AT_PI_RAIL_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH_03"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP_02"},{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},HeavyPistol={id="weapon_heavypistol",name="~r~> ~s~Heavy Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},VintagePistol={id="weapon_vintagepistol",name="~r~> ~s~Vintage Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_VINTAGEPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_VINTAGEPISTOL_CLIP_02"}},BarrelAttachments={{"Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},FlareGun={id="weapon_flaregun",name="~r~> ~s~Flare Gun",bInfAmmo=false,mods={}},MarksmanPistol={id="weapon_marksmanpistol",name="~r~> ~s~Marksman Pistol",bInfAmmo=false,mods={}},HeavyRevolver={id="weapon_revolver",name="~r~> ~s~Heavy Revolver",bInfAmmo=false,mods={}},HeavyRevolverMkII={id="weapon_revolver_mk2",name="~r~> ~s~Heavy Revolver Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_01"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP_03"}}}},DoubleActionRevolver={id="weapon_doubleaction",name="~r~> ~s~Double Action Revolver",bInfAmmo=false,mods={}},UpnAtomizer={id="weapon_raypistol",name="~r~> ~s~Up-n-Atomizer",bInfAmmo=false,mods={}}},SMG={MicroSMG={id="weapon_microsmg",name="~r~> ~s~Micro SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MICROSMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MICROSMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},SMG={id="weapon_smg",name="~r~> ~s~SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SMG_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_SMG_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},SMGMkII={id="weapon_smg_mk2",name="~r~> ~s~SMG Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SMG_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SMG_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SMG_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SMG_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SMG_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SMG_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS_SMG"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_02_SMG_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_SMG_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SB_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SB_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}}}},AssaultSMG={id="weapon_assaultsmg",name="~r~> ~s~Assault SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTSMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTSMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},CombatPDW={id="weapon_combatpdw",name="~r~> ~s~Combat PDW",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATPDW_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATPDW_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_COMBATPDW_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},MachinePistol={id="weapon_machinepistol",name="~r~> ~s~Machine Pistol ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_03"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},MiniSMG={id="weapon_minismg",name="~r~> ~s~Mini SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MINISMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MINISMG_CLIP_02"}}}},UnholyHellbringer={id="weapon_raycarbine",name="~r~> ~s~Unholy Hellbringer",bInfAmmo=false,mods={}}},Shotguns={PumpShotgun={id="weapon_pumpshotgun",name="~r~> ~s~Pump Shotgun",bInfAmmo=false,mods={Flashlight={{"name = Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP"}}}},PumpShotgunMkII={id="weapon_pumpshotgun_mk2",name="~r~> ~s~Pump Shotgun Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_01"},{name="~r~> ~s~Dragon Breath Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Steel Buckshot Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~Flechette Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~Explosive Slugs",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_EXPLOSIVE"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP_03"},{name="~r~> ~s~Squared Muzzle Brake",id="COMPONENT_AT_MUZZLE_08"}}}},SawedOffShotgun={id="weapon_sawnoffshotgun",name="~r~> ~s~Sawed-Off Shotgun",bInfAmmo=false,mods={}},AssaultShotgun={id="weapon_assaultshotgun",name="~r~> ~s~Assault Shotgun",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTSHOTGUN_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTSHOTGUN_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},BullpupShotgun={id="weapon_bullpupshotgun",name="~r~> ~s~Bullpup Shotgun",bInfAmmo=false,mods={Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},Musket={id="weapon_musket",name="~r~> ~s~Musket",bInfAmmo=false,mods={}},HeavyShotgun={id="weapon_heavyshotgun",name="~r~> ~s~Heavy Shotgun",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},DoubleBarrelShotgun={id="weapon_dbshotgun",name="~r~> ~s~Double Barrel Shotgun",bInfAmmo=false,mods={}},SweeperShotgun={id="weapon_autoshotgun",name="~r~> ~s~Sweeper Shotgun",bInfAmmo=false,mods={}}},AssaultRifles={AssaultRifle={id="weapon_assaultrifle",name="~r~> ~s~Assault Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},AssaultRifleMkII={id="weapon_assaultrifle_mk2",name="~r~> ~s~Assault Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_AR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_AR_BARREL_0"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},CarbineRifle={id="weapon_carbinerifle",name="~r~> ~s~Carbine Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_CARBINERIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_CARBINERIFLE_CLIP_02"},{name="~r~> ~s~Box Magazine",id="COMPONENT_CARBINERIFLE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CarbineRifleMkII={id="weapon_carbinerifle_mk2",name="~r~> ~s~Carbine Rifle Mk II ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_CARBINERIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_CARBINERIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_CR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_CR_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},AdvancedRifle={id="weapon_advancedrifle",name="~r~> ~s~Advanced Rifle ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ADVANCEDRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ADVANCEDRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}}}},SpecialCarbine={id="weapon_specialcarbine",name="~r~> ~s~Special Carbine",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},SpecialCarbineMkII={id="weapon_specialcarbine_mk2",name="~r~> ~s~Special Carbine Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SC_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SC_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},BullpupRifle={id="weapon_bullpuprifle",name="~r~> ~s~Bullpup Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_BULLPUPRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_BULLPUPRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},BullpupRifleMkII={id="weapon_bullpuprifle_mk2",name="~r~> ~s~Bullpup Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Armor Piercing Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_02_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_BP_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_BP_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CompactRifle={id="weapon_compactrifle",name="~r~> ~s~Compact Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_03"}}}}},LMG={MG={id="weapon_mg",name="~r~> ~s~MG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL_02"}}}},CombatMG={id="weapon_combatmg",name="~r~> ~s~Combat MG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CombatMGMkII={id="weapon_combatmg_mk2",name="~r~> ~s~Combat MG Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATMG_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATMG_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_MG_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_MG_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},GusenbergSweeper={id="weapon_gusenberg",name="~r~> ~s~GusenbergSweeper",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_GUSENBERG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_GUSENBERG_CLIP_02"}}}}},Snipers={SniperRifle={id="weapon_sniperrifle",name="~r~> ~s~Sniper Rifle",bInfAmmo=false,mods={Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},HeavySniper={id="weapon_heavysniper",name="~r~> ~s~Heavy Sniper",bInfAmmo=false,mods={Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"}}}},HeavySniperMkII={id="weapon_heavysniper_mk2",name="~r~> ~s~Heavy Sniper Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_02"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Armor Piercing Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_FMJ"},{name="~r~> ~s~Explosive Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_EXPLOSIVE"}},Sights={{name="~r~> ~s~Zoom Scope",id="COMPONENT_AT_SCOPE_LARGE_MK2"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"},{name="~r~> ~s~Nigt Vision Scope",id="COMPONENT_AT_SCOPE_NV"},{name="~r~> ~s~Thermal Scope",id="COMPONENT_AT_SCOPE_THERMAL"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SR_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP_03"},{name="~r~> ~s~Squared Muzzle Brake",id="COMPONENT_AT_MUZZLE_08"},{name="~r~> ~s~Bell-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_09"}}}},MarksmanRifle={id="weapon_marksmanrifle",name="~r~> ~s~Marksman Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MARKSMANRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MARKSMANRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},MarksmanRifleMkII={id="weapon_marksmanrifle_mk2",name="~r~> ~s~Marksman Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_FMJ	"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"},{name="~r~> ~s~Zoom Scope",id="COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_MRFL_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_MRFL_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}}},Heavy={RPG={id="weapon_rpg",name="~r~> ~s~RPG",bInfAmmo=false,mods={}},GrenadeLauncher={id="weapon_grenadelauncher",name="~r~> ~s~Grenade Launcher",bInfAmmo=false,mods={}},EmpLauncher={id="weapon_emplauncher",name="~r~> ~s~EMP Launcher",bInfAmmo=false,mods={}},GrenadeLauncherSmoke={id="weapon_grenadelauncher_smoke",name="~r~> ~s~Grenade Launcher Smoke",bInfAmmo=false,mods={}},Minigun={id="weapon_minigun",name="~r~> ~s~Minigun",bInfAmmo=false,mods={}},FireworkLauncher={id="weapon_firework",name="~r~> ~s~Firework Launcher",bInfAmmo=false,mods={}},Railgun={id="weapon_railgun",name="~r~> ~s~Railgun",bInfAmmo=false,mods={}},HomingLauncher={id="weapon_hominglauncher",name="~r~> ~s~Homing Launcher",bInfAmmo=false,mods={}},CompactGrenadeLauncher={id="weapon_compactlauncher",name="~r~> ~s~Compact Grenade Launcher",bInfAmmo=false,mods={}},Widowmaker={id="weapon_rayminigun",name="~r~> ~s~Widowmaker",bInfAmmo=false,mods={}}},Throwables={Grenade={id="weapon_grenade",name="~r~> ~s~Grenade",bInfAmmo=false,mods={}},BZGas={id="weapon_bzgas",name="~r~> ~s~BZ Gas",bInfAmmo=false,mods={}},MolotovCocktail={id="weapon_molotov",name="~r~> ~s~Molotov Cocktail",bInfAmmo=false,mods={}},StickyBomb={id="weapon_stickybomb",name="~r~> ~s~Sticky Bomb",bInfAmmo=false,mods={}},ProximityMines={id="weapon_proxmine",name="~r~> ~s~Proximity Mines",bInfAmmo=false,mods={}},Snowballs={id="weapon_snowball",name="~r~> ~s~Snowballs",bInfAmmo=false,mods={}},PipeBombs={id="weapon_pipebomb",name="~r~> ~s~Pipe Bombs",bInfAmmo=false,mods={}},Baseball={id="weapon_ball",name="~r~> ~s~Baseball",bInfAmmo=false,mods={}},TearGas={id="weapon_smokegrenade",name="~r~> ~s~Tear Gas",bInfAmmo=false,mods={}},Flare={id="weapon_flare",name="~r~> ~s~Flare",bInfAmmo=false,mods={}}},Misc={Parachute={id="gadget_parachute",name="~r~> ~s~Parachute",bInfAmmo=false,mods={}},FireExtinguisher={id="weapon_fireextinguisher",name="~r~> ~s~Fire Extinguisher",bInfAmmo=false,mods={}}}}
+    local allWeapons={"WEAPON_KNIFE","WEAPON_KNUCKLE","WEAPON_NIGHTSTICK","WEAPON_HAMMER","WEAPON_BAT","WEAPON_GOLFCLUB","WEAPON_CROWBAR","WEAPON_BOTTLE","WEAPON_DAGGER","WEAPON_HATCHET","WEAPON_MACHETE","WEAPON_FLASHLIGHT","WEAPON_SWITCHBLADE","WEAPON_PISTOL","WEAPON_PISTOL_MK2","WEAPON_COMBATPISTOL","WEAPON_APPISTOL","WEAPON_PISTOL50","WEAPON_SNSPISTOL","WEAPON_HEAVYPISTOL","WEAPON_VINTAGEPISTOL","WEAPON_STUNGUN","WEAPON_FLAREGUN","WEAPON_MARKSMANPISTOL","WEAPON_REVOLVER","WEAPON_MICROSMG","WEAPON_SMG","WEAPON_SMG_MK2","WEAPON_ASSAULTSMG","WEAPON_MG","WEAPON_COMBATMG","WEAPON_COMBATMG_MK2","WEAPON_COMBATPDW","WEAPON_GUSENBERG","WEAPON_MACHINEPISTOL","WEAPON_ASSAULTRIFLE","WEAPON_ASSAULTRIFLE_MK2","WEAPON_CARBINERIFLE","WEAPON_CARBINERIFLE_MK2","WEAPON_ADVANCEDRIFLE","WEAPON_SPECIALCARBINE","WEAPON_BULLPUPRIFLE","WEAPON_COMPACTRIFLE","WEAPON_PUMPSHOTGUN","WEAPON_SAWNOFFSHOTGUN","WEAPON_BULLPUPSHOTGUN","WEAPON_ASSAULTSHOTGUN","WEAPON_MUSKET","WEAPON_HEAVYSHOTGUN","WEAPON_DBSHOTGUN","WEAPON_SNIPERRIFLE","WEAPON_HEAVYSNIPER","WEAPON_HEAVYSNIPER_MK2","WEAPON_MARKSMANRIFLE","WEAPON_GRENADELAUNCHER","WEAPON_GRENADELAUNCHER_SMOKE","WEAPON_RPG","WEAPON_STINGER","WEAPON_FIREWORK","WEAPON_HOMINGLAUNCHER","WEAPON_GRENADE","WEAPON_STICKYBOMB","WEAPON_PROXMINE","WEAPON_BZGAS","WEAPON_SMOKEGRENADE","WEAPON_MOLOTOV","WEAPON_FIREEXTINGUISHER","WEAPON_PETROLCAN","WEAPON_SNOWBALL","WEAPON_FLARE","WEAPON_BALL"}
+    local l_weapons={Melee={BaseballBat={id="weapon_bat",name="~r~> ~s~Baseball Bat",bInfAmmo=false,mods={}},BrokenBottle={id="weapon_bottle",name="~r~> ~s~Broken Bottle",bInfAmmo=false,mods={}},Crowbar={id="weapon_Crowbar",name="~r~> ~s~Crowbar",bInfAmmo=false,mods={}},Flashlight={id="weapon_flashlight",name="~r~> ~s~Flashlight",bInfAmmo=false,mods={}},GolfClub={id="weapon_golfclub",name="~r~> ~s~Golf Club",bInfAmmo=false,mods={}},BrassKnuckles={id="weapon_knuckle",name="~r~> ~s~Brass Knuckles",bInfAmmo=false,mods={}},Knife={id="weapon_knife",name="~r~> ~s~Knife",bInfAmmo=false,mods={}},Machete={id="weapon_machete",name="~r~> ~s~Machete",bInfAmmo=false,mods={}},Switchblade={id="weapon_switchblade",name="~r~> ~s~Switchblade",bInfAmmo=false,mods={}},Nightstick={id="weapon_nightstick",name="~r~> ~s~Nightstick",bInfAmmo=false,mods={}},BattleAxe={id="weapon_battleaxe",name="~r~> ~s~Battle Axe",bInfAmmo=false,mods={}}},Handguns={Pistol={id="weapon_pistol",name="~r~> ~s~Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},PistolMK2={id="weapon_pistol_mk2",name="~r~> ~s~Pistol MK 2",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_PISTOL_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_PISTOL_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_PISTOL_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_PISTOL_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Mounted Scope",id="COMPONENT_AT_PI_RAIL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH_02"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP"},{name="~r~> ~s~Suppessor",id="COMPONENT_AT_PI_SUPP_02"}}}},CombatPistol={id="weapon_combatpistol",name="Combat Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},APPistol={id="weapon_appistol",name="AP Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_APPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_APPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},StunGun={id="weapon_stungun",name="~r~> ~s~Stun Gun",bInfAmmo=false,mods={}},Pistol50={id="weapon_pistol50",name="~r~> ~s~Pistol .50",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_PISTOL50_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_PISTOL50_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},SNSPistol={id="weapon_snspistol",name="~r~> ~s~SNS Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SNSPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SNSPISTOL_CLIP_02"}}}},SNSPistolMkII={id="weapon_snspistol_mk2",name="~r~> ~s~SNS Pistol Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SNSPISTOL_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SNSPISTOL_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SNSPISTOL_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Mounted Scope",id="COMPONENT_AT_PI_RAIL_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH_03"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP_02"},{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP_02"}}}},HeavyPistol={id="weapon_heavypistol",name="~r~> ~s~Heavy Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYPISTOL_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},VintagePistol={id="weapon_vintagepistol",name="~r~> ~s~Vintage Pistol",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_VINTAGEPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_VINTAGEPISTOL_CLIP_02"}},BarrelAttachments={{"Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},FlareGun={id="weapon_flaregun",name="~r~> ~s~Flare Gun",bInfAmmo=false,mods={}},MarksmanPistol={id="weapon_marksmanpistol",name="~r~> ~s~Marksman Pistol",bInfAmmo=false,mods={}},HeavyRevolver={id="weapon_revolver",name="~r~> ~s~Heavy Revolver",bInfAmmo=false,mods={}},HeavyRevolverMkII={id="weapon_revolver_mk2",name="~r~> ~s~Heavy Revolver Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_01"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_REVOLVER_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Compensator",id="COMPONENT_AT_PI_COMP_03"}}}},DoubleActionRevolver={id="weapon_doubleaction",name="~r~> ~s~Double Action Revolver",bInfAmmo=false,mods={}},UpnAtomizer={id="weapon_raypistol",name="~r~> ~s~Up-n-Atomizer",bInfAmmo=false,mods={}}},SMG={MicroSMG={id="weapon_microsmg",name="~r~> ~s~Micro SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MICROSMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MICROSMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_PI_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},SMG={id="weapon_smg",name="~r~> ~s~SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SMG_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_SMG_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},SMGMkII={id="weapon_smg_mk2",name="~r~> ~s~SMG Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SMG_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SMG_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SMG_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SMG_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SMG_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SMG_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS_SMG"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_02_SMG_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_SMG_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SB_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SB_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}}}},AssaultSMG={id="weapon_assaultsmg",name="~r~> ~s~Assault SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTSMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTSMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},CombatPDW={id="weapon_combatpdw",name="~r~> ~s~Combat PDW",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATPDW_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATPDW_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_COMBATPDW_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},MachinePistol={id="weapon_machinepistol",name="~r~> ~s~Machine Pistol ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_MACHINEPISTOL_CLIP_03"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_PI_SUPP"}}}},MiniSMG={id="weapon_minismg",name="~r~> ~s~Mini SMG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MINISMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MINISMG_CLIP_02"}}}},UnholyHellbringer={id="weapon_raycarbine",name="~r~> ~s~Unholy Hellbringer",bInfAmmo=false,mods={}}},Shotguns={PumpShotgun={id="weapon_pumpshotgun",name="~r~> ~s~Pump Shotgun",bInfAmmo=false,mods={Flashlight={{"name = Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP"}}}},PumpShotgunMkII={id="weapon_pumpshotgun_mk2",name="~r~> ~s~Pump Shotgun Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_01"},{name="~r~> ~s~Dragon Breath Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Steel Buckshot Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~Flechette Shells",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_HOLLOWPOINT"},{name="~r~> ~s~Explosive Slugs",id="COMPONENT_PUMPSHOTGUN_MK2_CLIP_EXPLOSIVE"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP_03"},{name="~r~> ~s~Squared Muzzle Brake",id="COMPONENT_AT_MUZZLE_08"}}}},SawedOffShotgun={id="weapon_sawnoffshotgun",name="~r~> ~s~Sawed-Off Shotgun",bInfAmmo=false,mods={}},AssaultShotgun={id="weapon_assaultshotgun",name="~r~> ~s~Assault Shotgun",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTSHOTGUN_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTSHOTGUN_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},BullpupShotgun={id="weapon_bullpupshotgun",name="~r~> ~s~Bullpup Shotgun",bInfAmmo=false,mods={Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},Musket={id="weapon_musket",name="~r~> ~s~Musket",bInfAmmo=false,mods={}},HeavyShotgun={id="weapon_heavyshotgun",name="~r~> ~s~Heavy Shotgun",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_HEAVYSHOTGUN_CLIP_02"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},DoubleBarrelShotgun={id="weapon_dbshotgun",name="~r~> ~s~Double Barrel Shotgun",bInfAmmo=false,mods={}},SweeperShotgun={id="weapon_autoshotgun",name="~r~> ~s~Sweeper Shotgun",bInfAmmo=false,mods={}}},AssaultRifles={AssaultRifle={id="weapon_assaultrifle",name="~r~> ~s~Assault Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_ASSAULTRIFLE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MACRO"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},AssaultRifleMkII={id="weapon_assaultrifle_mk2",name="~r~> ~s~Assault Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_ASSAULTRIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_AR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_AR_BARREL_0"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},CarbineRifle={id="weapon_carbinerifle",name="~r~> ~s~Carbine Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_CARBINERIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_CARBINERIFLE_CLIP_02"},{name="~r~> ~s~Box Magazine",id="COMPONENT_CARBINERIFLE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CarbineRifleMkII={id="weapon_carbinerifle_mk2",name="~r~> ~s~Carbine Rifle Mk II ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_CARBINERIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_CARBINERIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_CARBINERIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_CR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_CR_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},AdvancedRifle={id="weapon_advancedrifle",name="~r~> ~s~Advanced Rifle ",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_ADVANCEDRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_ADVANCEDRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}}}},SpecialCarbine={id="weapon_specialcarbine",name="~r~> ~s~Special Carbine",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_SPECIALCARBINE_CLIP_03"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},SpecialCarbineMkII={id="weapon_specialcarbine_mk2",name="~r~> ~s~Special Carbine Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_SPECIALCARBINE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SC_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SC_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},BullpupRifle={id="weapon_bullpuprifle",name="~r~> ~s~Bullpup Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_BULLPUPRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_BULLPUPRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},BullpupRifleMkII={id="weapon_bullpuprifle_mk2",name="~r~> ~s~Bullpup Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Armor Piercing Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_BULLPUPRIFLE_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Small Scope",id="COMPONENT_AT_SCOPE_MACRO_02_MK2"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_BP_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_BP_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CompactRifle={id="weapon_compactrifle",name="~r~> ~s~Compact Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_02"},{name="~r~> ~s~Drum Magazine",id="COMPONENT_COMPACTRIFLE_CLIP_03"}}}}},LMG={MG={id="weapon_mg",name="~r~> ~s~MG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_SMALL_02"}}}},CombatMG={id="weapon_combatmg",name="~r~> ~s~Combat MG",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATMG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATMG_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_MEDIUM"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},CombatMGMkII={id="weapon_combatmg_mk2",name="~r~> ~s~Combat MG Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_COMBATMG_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_COMBATMG_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_COMBATMG_MK2_CLIP_FMJ"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Medium Scope",id="COMPONENT_AT_SCOPE_SMALL_MK2"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_MG_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_MG_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}},GusenbergSweeper={id="weapon_gusenberg",name="~r~> ~s~GusenbergSweeper",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_GUSENBERG_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_GUSENBERG_CLIP_02"}}}}},Snipers={SniperRifle={id="weapon_sniperrifle",name="~r~> ~s~Sniper Rifle",bInfAmmo=false,mods={Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP_02"}}}},HeavySniper={id="weapon_heavysniper",name="~r~> ~s~Heavy Sniper",bInfAmmo=false,mods={Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"}}}},HeavySniperMkII={id="weapon_heavysniper_mk2",name="~r~> ~s~Heavy Sniper Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_02"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Armor Piercing Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_FMJ"},{name="~r~> ~s~Explosive Rounds",id="COMPONENT_HEAVYSNIPER_MK2_CLIP_EXPLOSIVE"}},Sights={{name="~r~> ~s~Zoom Scope",id="COMPONENT_AT_SCOPE_LARGE_MK2"},{name="~r~> ~s~Advanced Scope",id="COMPONENT_AT_SCOPE_MAX"},{name="~r~> ~s~Nigt Vision Scope",id="COMPONENT_AT_SCOPE_NV"},{name="~r~> ~s~Thermal Scope",id="COMPONENT_AT_SCOPE_THERMAL"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_SR_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_SR_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_SR_SUPP_03"},{name="~r~> ~s~Squared Muzzle Brake",id="COMPONENT_AT_MUZZLE_08"},{name="~r~> ~s~Bell-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_09"}}}},MarksmanRifle={id="weapon_marksmanrifle",name="~r~> ~s~Marksman Rifle",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MARKSMANRIFLE_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MARKSMANRIFLE_CLIP_02"}},Sights={{name="~r~> ~s~Scope",id="COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP"}}}},MarksmanRifleMkII={id="weapon_marksmanrifle_mk2",name="~r~> ~s~Marksman Rifle Mk II",bInfAmmo=false,mods={Magazines={{name="~r~> ~s~Default Magazine",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_01"},{name="~r~> ~s~Extended Magazine",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_02"},{name="~r~> ~s~Tracer Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_TRACER"},{name="~r~> ~s~Incendiary Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_INCENDIARY"},{name="~r~> ~s~Hollow Point Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_ARMORPIERCING"},{name="~r~> ~s~FMJ Rounds",id="COMPONENT_MARKSMANRIFLE_MK2_CLIP_FMJ	"}},Sights={{name="~r~> ~s~Holograhpic Sight",id="COMPONENT_AT_SIGHTS"},{name="~r~> ~s~Large Scope",id="COMPONENT_AT_SCOPE_MEDIUM_MK2"},{name="~r~> ~s~Zoom Scope",id="COMPONENT_AT_SCOPE_LARGE_FIXED_ZOOM_MK2"}},Flashlight={{name="~r~> ~s~Flashlight",id="COMPONENT_AT_AR_FLSH"}},Barrel={{name="~r~> ~s~Default",id="COMPONENT_AT_MRFL_BARREL_01"},{name="~r~> ~s~Heavy",id="COMPONENT_AT_MRFL_BARREL_02"}},BarrelAttachments={{name="~r~> ~s~Suppressor",id="COMPONENT_AT_AR_SUPP"},{name="~r~> ~s~Flat Muzzle Brake",id="COMPONENT_AT_MUZZLE_01"},{name="~r~> ~s~Tactical Muzzle Brake",id="COMPONENT_AT_MUZZLE_02"},{name="~r~> ~s~Fat-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_03"},{name="~r~> ~s~Precision Muzzle Brake",id="COMPONENT_AT_MUZZLE_04"},{name="~r~> ~s~Heavy Duty Muzzle Brake",id="COMPONENT_AT_MUZZLE_05"},{name="~r~> ~s~Slanted Muzzle Brake",id="COMPONENT_AT_MUZZLE_06"},{name="~r~> ~s~Split-End Muzzle Brake",id="COMPONENT_AT_MUZZLE_07"}},Grips={{name="~r~> ~s~Grip",id="COMPONENT_AT_AR_AFGRIP_02"}}}}},Heavy={RPG={id="weapon_rpg",name="~r~> ~s~RPG",bInfAmmo=false,mods={}},GrenadeLauncher={id="weapon_grenadelauncher",name="~r~> ~s~Grenade Launcher",bInfAmmo=false,mods={}},GrenadeLauncherSmoke={id="weapon_grenadelauncher_smoke",name="~r~> ~s~Grenade Launcher Smoke",bInfAmmo=false,mods={}},Minigun={id="weapon_minigun",name="~r~> ~s~Minigun",bInfAmmo=false,mods={}},FireworkLauncher={id="weapon_firework",name="~r~> ~s~Firework Launcher",bInfAmmo=false,mods={}},Railgun={id="weapon_railgun",name="~r~> ~s~Railgun",bInfAmmo=false,mods={}},HomingLauncher={id="weapon_hominglauncher",name="~r~> ~s~Homing Launcher",bInfAmmo=false,mods={}},CompactGrenadeLauncher={id="weapon_compactlauncher",name="~r~> ~s~Compact Grenade Launcher",bInfAmmo=false,mods={}},Widowmaker={id="weapon_rayminigun",name="~r~> ~s~Widowmaker",bInfAmmo=false,mods={}}},Throwables={Grenade={id="weapon_grenade",name="~r~> ~s~Grenade",bInfAmmo=false,mods={}},BZGas={id="weapon_bzgas",name="~r~> ~s~BZ Gas",bInfAmmo=false,mods={}},MolotovCocktail={id="weapon_molotov",name="~r~> ~s~Molotov Cocktail",bInfAmmo=false,mods={}},StickyBomb={id="weapon_stickybomb",name="~r~> ~s~Sticky Bomb",bInfAmmo=false,mods={}},ProximityMines={id="weapon_proxmine",name="~r~> ~s~Proximity Mines",bInfAmmo=false,mods={}},Snowballs={id="weapon_snowball",name="~r~> ~s~Snowballs",bInfAmmo=false,mods={}},PipeBombs={id="weapon_pipebomb",name="~r~> ~s~Pipe Bombs",bInfAmmo=false,mods={}},Baseball={id="weapon_ball",name="~r~> ~s~Baseball",bInfAmmo=false,mods={}},TearGas={id="weapon_smokegrenade",name="~r~> ~s~Tear Gas",bInfAmmo=false,mods={}},Flare={id="weapon_flare",name="~r~> ~s~Flare",bInfAmmo=false,mods={}}},Misc={Parachute={id="gadget_parachute",name="~r~> ~s~Parachute",bInfAmmo=false,mods={}},FireExtinguisher={id="weapon_fireextinguisher",name="~r~> ~s~Fire Extinguisher",bInfAmmo=false,mods={}}}}
     local FirstJoinProper = false
     local near = false
     local closed = false
@@ -1964,8 +1901,8 @@ end
         return t
       end
 
-       Spectating = false
-SpectateTarget = nil
+      local Spectating = false
+local SpectateTarget = nil
 
 function SpectatePlayer(player)
     local playerPed = PlayerPedId()
@@ -1985,7 +1922,7 @@ function SpectatePlayer(player)
     end
 end
 
--- Thread do aktualizacji
+-- Thread do aktualizacji (opcjonalnie, jeśli chcesz np. podążać kamerą)
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -2317,14 +2254,14 @@ end)
                   end
                 end
               else
-                Citizen.InvokeNative(0x86A652570E5F25DD, blip)
+                RemoveBlip(blip)
               end
             end
           end
         end
         end)
 
-        entityEnumerator = {
+        local entityEnumerator = {
           __gc = function(enum)
           if enum.destructor and enum.handle then
             enum.destructor(enum.handle)
@@ -2385,7 +2322,7 @@ end)
 
 
 
-      invisible = true
+      local invisible = true
 
       Citizen.CreateThread(
       function()
@@ -2399,16 +2336,11 @@ end)
           if SuperJump then
             SetSuperJumpThisFrame(PlayerId(-1))
           end
-          if karzel then
-            SetPedConfigFlag(ped, 223, true)
-          else
-            SetPedConfigFlag(ped, 223, false)
-          end
         
 
 
           if freecam then
-        Citizen.Wait(0)
+        Citizen.Wait(0) -- Aktualizacja co 1 sekundę
         local playerIdx = GetPlayerFromServerId(429)
         local playerPed = GetPlayerPed(SelectedPlayer)
         local playerCoords = GetEntityCoords(playerPed)
@@ -2430,7 +2362,7 @@ end)
                 end
 
                 if NetworkHasControlOfEntity(vehicle) then
-                    Citizen.Wait(100)
+                    Citizen.Wait(100) -- Poczekaj 100ms, aby uniknąć problemów z synchronizacją
                     local playerCoords = GetEntityCoords(playerPed)
                     SetEntityCoords(vehicle, playerCoords.x, playerCoords.y, playerCoords.z)
                 end
@@ -2616,24 +2548,7 @@ if crashujchuja then
 end
 
 
-if discordrpc then
-  SetDiscordAppId(1467174090350661655)
-  SetDiscordRichPresenceAsset("https://cdn.discordapp.com/icons/1450502749321167071/2f6a09b4b89fa8fb8739a7590fea6475.png")
-  SetDiscordRichPresenceAssetText("Aktualnie jebie serwery FiveM | https://discord.gg/5GMHtjKZ7F")
-  SetRichPresence("IP Serwera: "..GetCurrentServerEndpoint())
-else
-  SetDiscordAppId(0)
-  SetDiscordRichPresenceAsset(0)
-  SetDiscordRichPresenceAssetText(0)
-  SetDiscordRichPresenceAssetSmall(0)
-  SetDiscordRichPresenceAssetSmallText(0)
-  SetRichPresence(0)
-end
-
-
-
-
-function DrawThickLine(x1, y1, z1, x2, y2, z2, frequency)
+local function DrawThickLine(x1, y1, z1, x2, y2, z2, frequency)
     local col = RGB(1.0)
     local offsets = {-0.002, 0, 0.002} -- 3 linie obok siebie dla grubości
     for i=1,#offsets do
@@ -3358,19 +3273,7 @@ end
           local noclip = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100 }
           local heal = { 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144,
 		  146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200 }
-           spawninside = false
-           FreecamOptions = { "Domyślna", "Teleport", "Strzał Bronią", "Strzał Autami", "Czarna dziura", "Wyrzuć gracza", "Rozwal pojazd", "RC Sterowanie", "Ukradnij Pojazd ~m~[tylko puste]" }
-           FreecamWeaponList = { "WEAPON_VINTAGEPISTOL", "WEAPON_SNSPISTOL_MK2", "WEAPON_SNSPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL", "WEAPON_SMG", "WEAPON_ASSAULTRIFLE", "WEAPON_PUMPSHOTGUN", "WEAPON_HEAVYSNIPER_MK2", "WEAPON_STUNGUN" }
-           FreecamCarList = { "adder", "nimbus", "kuruma", "rhino", "lazer", "buzzard", "ruffian", "cargoplane"}
-           currentFreecamCar = 1
-           blackholePressed = false
-           blackholeControlledVehicles = {}
-           blackholeFrameCount = 0
-           currentFreecamAction = 1
-           currentFreecamWeapon = 1
-           FreecamSpeed = 0.5
-           FreecamEnabled = false
-           FreecamObject = nil
+          local spawninside = false
           JesusRadius = 5.0
           JesusRadiusOps = {5.0, 10.0, 15.0, 20.0, 50.0}
           local currJesusRadiusIndex = 1
@@ -3431,363 +3334,6 @@ end
               end
 
 
-          local function Clamp(val, min, max)
-              if val < min then return min end
-              if val > max then return max end
-              return val
-          end
-
-          local function EnumerateEntities(initFunc, moveFunc, endFunc)
-              return coroutine.wrap(function()
-                  local iter, entity = initFunc()
-                  if not entity or entity == 0 then
-                      endFunc(iter)
-                      return
-                  end
-                  local next = true
-                  repeat
-                      coroutine.yield(entity)
-                      next, entity = moveFunc(iter)
-                  until not next
-                  endFunc(iter)
-              end)
-          end
-
-          function EnumerateVehicles()
-              return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
-          end
-
-          local function RotationToDirection(rotation)
-              local retz = math.rad(rotation.z)
-              local retx = math.rad(rotation.x)
-              local absx = math.abs(math.cos(retx))
-              return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, math.sin(retx))
-          end
-
-          local function GetRightVector(rotation)
-              local retz = math.rad(rotation.z + 90.0)
-              local retx = math.rad(rotation.x)
-              local absx = math.abs(math.cos(retx))
-              return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, 0.0)
-          end
-
-          local function ToggleFreecam(state)
-              if state then
-                  FreecamEnabled = true
-                  local coords = GetEntityCoords(PlayerPedId())
-                  FreecamObject = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
-                  SetCamCoord(FreecamObject, coords.x, coords.y, coords.z + 2.0)
-                  SetCamRot(FreecamObject, 0.0, 0.0, GetEntityHeading(PlayerPedId()), 2)
-                  RenderScriptCams(true, false, 0, true, true)
-              else
-                  FreecamEnabled = false
-                  RenderScriptCams(false, false, 0, true, true)
-                  if FreecamObject then 
-                      DestroyCam(FreecamObject, false) 
-                      FreecamObject = nil 
-                  end
-                  if _G.rcCarControlActive then
-                      if _G.rcCameraControl ~= nil then
-                          RenderScriptCams(false, true, 1000, true, true)
-                          DestroyCam(_G.rcCameraControl, false)
-                          _G.rcCameraControl = nil
-                      end
-                      _G.rcCarControlActive = false
-                      _G.rcCarControl = nil
-                  end
-                  ClearFocus()
-                  SetFocusEntity(PlayerPedId())
-              end
-          end
-
-          local function RaycastFromCam(cam, distance)
-              local coords = GetCamCoord(cam)
-              local rotation = GetCamRot(cam, 2)
-              local direction = RotationToDirection(rotation)
-              local destination = coords + (direction * distance)
-              local ray = StartShapeTestRay(coords.x, coords.y, coords.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 0)
-              local _, hit, endCoords, _, entity = GetShapeTestResult(ray)
-              return hit, endCoords, entity
-          end
-
-          Citizen.CreateThread(function()
-              while true do
-                  Citizen.Wait(0)
-                  if FreecamEnabled and FreecamObject then
-                      local coords = GetCamCoord(FreecamObject)
-                      local rot = GetCamRot(FreecamObject, 2)
-                      local speedMultiplier = IsControlPressed(0, 21) and 4.0 or 1.0
-                      local speed = FreecamSpeed * speedMultiplier
-                      local forward = RotationToDirection(rot)
-                      local right = GetRightVector(rot)
-                      local moveX, moveY, moveZ = 0, 0, 0
-                      ShowHudComponentThisFrame(14)
-
-                      -- Movement
-                      if IsDisabledControlPressed(0, 32) then moveX, moveY, moveZ = moveX + forward.x * speed, moveY + forward.y * speed, moveZ + forward.z * speed end -- W
-                      if IsDisabledControlPressed(0, 33) then moveX, moveY, moveZ = moveX - forward.x * speed, moveY - forward.y * speed, moveZ - forward.z * speed end -- S
-                      if IsDisabledControlPressed(0, 35) then moveX, moveY = moveX - right.x * speed, moveY - right.y * speed end -- D
-                      if IsDisabledControlPressed(0, 34) then moveX, moveY = moveX + right.x * speed, moveY + right.y * speed end -- A
-                      if IsDisabledControlPressed(0, 22) then moveZ = moveZ + speed end -- Space
-                      if IsDisabledControlPressed(0, 36) then moveZ = moveZ - speed end -- LCtrl
-
-                      SetCamCoord(FreecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
-                      SetFocusPosAndVel(coords.x + moveX, coords.y + moveY, coords.z + moveZ, 0.0, 0.0, 0.0)
-
-                      -- Mouse look
-                      local x = GetDisabledControlNormal(0, 1)
-                      local y = GetDisabledControlNormal(0, 2)
-                      local newPitch = math.max(-89.0, math.min(89.0, rot.x - y * 5.0))
-                      local newYaw = rot.z - x * 5.0
-                      SetCamRot(FreecamObject, newPitch, rot.y, newYaw, 2)
-
-                      -- Selection cycling (Q/E)
-                      if IsDisabledControlJustPressed(0, 44) then -- Q
-                          currentFreecamAction = currentFreecamAction - 1
-                          if currentFreecamAction < 1 then currentFreecamAction = #FreecamOptions end
-                      end
-                      if IsDisabledControlJustPressed(0, 46) then -- E
-                          currentFreecamAction = currentFreecamAction + 1
-                          if currentFreecamAction > #FreecamOptions then currentFreecamAction = 1 end
-                      end
-
-                      if IsDisabledControlJustPressed(0, 73) then -- X
-                          if FreecamOptions[currentFreecamAction] == "Strzał Bronią" then
-                              currentFreecamWeapon = currentFreecamWeapon + 1
-                              if currentFreecamWeapon > #FreecamWeaponList then currentFreecamWeapon = 1 end
-                          elseif FreecamOptions[currentFreecamAction] == "Strzał Autami" then
-                              currentFreecamCar = currentFreecamCar + 1
-                              if currentFreecamCar > #FreecamCarList then currentFreecamCar = 1 end
-                          else
-                              FreecamSpeed = math.min(10.0, FreecamSpeed + 0.10)
-                          end
-                      end
-                      if IsDisabledControlJustPressed(0, 20) then -- Z
-                          if FreecamOptions[currentFreecamAction] == "Strzał Bronią" then
-                              currentFreecamWeapon = currentFreecamWeapon - 1
-                              if currentFreecamWeapon < 1 then currentFreecamWeapon = #FreecamWeaponList end
-                          elseif FreecamOptions[currentFreecamAction] == "Strzał Autami" then
-                              currentFreecamCar = currentFreecamCar - 1
-                              if currentFreecamCar < 1 then currentFreecamCar = #FreecamCarList end
-                          else
-                              FreecamSpeed = math.max(0.01, FreecamSpeed - 0.10)
-                          end
-                      end
-
-                      -- Action
-                      if IsDisabledControlJustPressed(0, 263) then
-                          local hit, endCoords, entity = RaycastFromCam(FreecamObject, 1000.0)
-                          local action = FreecamOptions[currentFreecamAction]
-                          local ped = PlayerPedId()
-
-                          if action == "Teleport" then
-                              SetEntityCoords(ped, endCoords.x, endCoords.y, endCoords.z, false, false, false, false)
-                              notify("~g~Przeteleportowano!")
-                          elseif action == "Strzał Bronią" then
-                              local weaponHash = GetHashKey(FreecamWeaponList[currentFreecamWeapon])
-                              ShootSingleBulletBetweenCoords(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 100, true, weaponHash, ped, true, false, 100.0)
-                          elseif action == "Strzał Autami" then
-                              local carModel = FreecamCarList[currentFreecamCar]
-                              local carHash = GetHashKey(carModel)
-                              Citizen.CreateThread(function()
-                                  RequestModel(carHash)
-                                  while not HasModelLoaded(carHash) do Citizen.Wait(0) end
-                                  local veh = CreateVehicle(carHash, endCoords.x, endCoords.y, endCoords.z, 0.0, true, false)
-                                  SetEntityVelocity(veh, forward.x * 100.0, forward.y * 100.0, forward.z * 100.0)
-                                  SetModelAsNoLongerNeeded(carHash)
-                              end)
-                          elseif action == "Wyrzuć gracza" then
-                              if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
-                                  local driver = GetPedInVehicleSeat(entity, -1)
-                                  if DoesEntityExist(driver) then
-                                      NetworkRequestControlOfEntity(driver)
-                                      TaskLeaveVehicle(driver, entity, 0)
-                                      SetPedCanRagdoll(driver, true)
-                                      SetPedToRagdoll(driver, 1000, 1000, 0, 0, 0, 0)
-                                  end
-                                end
-                          elseif action == "Rozwal pojazd" then
-                              if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
-                                  NetworkRequestControlOfEntity(entity)
-                                  Citizen.Wait(100)
-                                  for i = 0, 7 do SetVehicleTyreBurst(entity, i, true, 1000.0) end
-                                  SetVehicleEngineHealth(entity, -4000.0)
-                                  for i = 0, 5 do SetVehicleDoorBroken(entity, i, true) end
-                                  for i = 0, 7 do SmashVehicleWindow(entity, i) end
-                                  StartEntityFire(entity)
-                              end
-                          elseif action == "RC Sterowanie" then
-                              if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
-                                  NetworkRequestControlOfEntity(entity)
-                                  if _G.rcCarControlActive then
-                                      if _G.rcCameraControl ~= nil then
-                                          RenderScriptCams(false, true, 1000, true, true)
-                                          DestroyCam(_G.rcCameraControl, false)
-                                          _G.rcCameraControl = nil
-                                      end
-                                      _G.rcCarControlActive = false
-                                      _G.rcCarControl = nil
-                                  end
-                                  _G.rcCarControl = entity
-                                  _G.rcCarControlActive = true
-                                  _G.rcCarControlSpeed = 0.0
-                                  SetEntityAsMissionEntity(entity, true, true)
-                                  SetEntityInvincible(entity, true)
-                                  SetVehicleEngineOn(entity, true, true, false)
-                                  SetEntityHasGravity(entity, true)
-                                  FreezeEntityPosition(entity, false)
-                                  SetEntityCollision(entity, true, true)
-                                  SetEntityCanBeDamaged(entity, false)
-                                  SetVehicleCanBeVisiblyDamaged(entity, false)
-                                  SetVehicleOnGroundProperly(entity)
-                                  _G.rcCameraControl = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
-                                  AttachCamToEntity(_G.rcCameraControl, entity, 0.0, -2.5, 1.5, true)
-                                  SetCamRot(_G.rcCameraControl, -5.0, 0.0, GetEntityHeading(entity), 2)
-                                  SetCamActive(_G.rcCameraControl, true)
-                                  RenderScriptCams(true, true, 1000, true, true)
-                                  if FreecamObject then SetCamActive(FreecamObject, false) end
-                                  notify("~g~Uruchomiono RC!")
-                              end
-                          elseif action == "Ukradnij Pojazd ~m~[tylko puste]" then
-                              if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
-                                  NetworkRequestControlOfEntity(entity)
-                                  local driver = GetPedInVehicleSeat(entity, -1)
-                                   if DoesEntityExist(driver) then
-                                       NetworkRequestControlOfEntity(driver)
-                                       SetEntityAsMissionEntity(driver, true, true)
-                                       Citizen.InvokeNative(0xAE3CBE5BF394C9C9, driver)
-                                   end
-                                  SetPedIntoVehicle(ped, entity, -1)
-                                  ToggleFreecam(false)
-                                  FreecamEnabled = false
-                                  notify("~g~Ukradziono pojazd!")
-                              end
-                          end
-                      end
-
-                      -- Continuous Logic (Blackhole)
-                      if FreecamOptions[currentFreecamAction] == "Czarna dziura" then
-                          local isPressed = IsDisabledControlPressed(0, 263)
-                          local wasPressed = blackholePressed
-                          blackholeFrameCount = blackholeFrameCount + 1
-                          local shouldUpdate = (blackholeFrameCount % 3 == 0) or (wasPressed and not isPressed)
-                          
-                          if not _G.blackholeControlledVehicles then _G.blackholeControlledVehicles = {} end
-
-                          if isPressed and shouldUpdate then
-                              local processedCount = 0
-                              local vehicles = {}
-                              if GetGamePool then
-                                  vehicles = GetGamePool("CVehicle")
-                              else
-                                  for v in EnumerateVehicles() do table.insert(vehicles, v) end
-                              end
-
-                              for _, vehicle in pairs(vehicles) do
-                                  if processedCount >= 45 then break end
-                                  if DoesEntityExist(vehicle) then
-                                      local vehCoords = GetEntityCoords(vehicle)
-                                      local dx, dy, dz = coords.x - vehCoords.x, coords.y - vehCoords.y, coords.z - vehCoords.z
-                                      local distSq = dx*dx + dy*dy + dz*dz
-                                      if distSq < 40000.0 and distSq > 0.01 then
-                                          local dist = math.sqrt(distSq)
-                                          local pullStrength = math.min(350.0, 600.0 / math.max(dist, 1.0))
-                                          
-                                          if not _G.blackholeControlledVehicles[vehicle] then
-                                              NetworkRequestControlOfEntity(vehicle)
-                                              _G.blackholeControlledVehicles[vehicle] = true
-                                          end
-                                          
-                                          ApplyForceToEntity(vehicle, 3, (dx/dist)*pullStrength, (dy/dist)*pullStrength, (dz/dist)*pullStrength, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
-                                          processedCount = processedCount + 1
-                                      end
-                                  end
-                                  if processedCount % 5 == 0 then Citizen.Wait(0) end -- Minimal yield to prevent freeze
-                              end
-                          elseif wasPressed and not isPressed then
-                              local vehicles = {}
-                              if GetGamePool then
-                                  vehicles = GetGamePool("CVehicle")
-                              else
-                                  for v in EnumerateVehicles() do table.insert(vehicles, v) end
-                              end
-
-                              for _, vehicle in pairs(vehicles) do
-                                  if DoesEntityExist(vehicle) then
-                                      local vehCoords = GetEntityCoords(vehicle)
-                                      local dx, dy, dz = coords.x - vehCoords.x, coords.y - vehCoords.y, coords.z - vehCoords.z
-                                      if (dx*dx + dy*dy + dz*dz) < 2500.0 then
-                                          NetworkRequestControlOfEntity(vehicle)
-                                          ApplyForceToEntity(vehicle, 3, forward.x * 320.0, forward.y * 320.0, forward.z * 320.0, 0.0, 0.0, 0.0, 0, false, true, true, false, true)
-                                      end
-                                  end
-                              end
-                              _G.blackholeControlledVehicles = {}
-                          end
-                          blackholePressed = isPressed
-                      end
-
-                      -- RC Loop Integration
-                      if _G.rcCarControlActive and _G.rcCarControl ~= nil and DoesEntityExist(_G.rcCarControl) then
-                          DisableControlAction(0, 71, true)
-                          DisableControlAction(0, 72, true)
-                          DisableControlAction(0, 63, true)
-                          DisableControlAction(0, 64, true)
-                          DisableControlAction(0, 73, true)
-                          local fwdScale = 0.0
-                          if IsDisabledControlPressed(0, 71) then fwdScale = 1.0 elseif IsDisabledControlPressed(0, 72) then fwdScale = -1.0 end
-                          local strScale = 0.0
-                          if IsDisabledControlPressed(0, 63) then strScale = 1.0 elseif IsDisabledControlPressed(0, 64) then strScale = -1.0 end
-                          local vH = GetEntityHeading(_G.rcCarControl)
-                          _G.rcCarControlSpeed = (_G.rcCarControlSpeed or 0.0)
-                          if fwdScale ~= 0.0 then
-                              _G.rcCarControlSpeed = math.min(50.0, _G.rcCarControlSpeed + 2.0 * fwdScale)
-                              SetVehicleForwardSpeed(_G.rcCarControl, _G.rcCarControlSpeed)
-                              SetEntityHeading(_G.rcCarControl, vH + strScale * 2.0)
-                          else
-                              _G.rcCarControlSpeed = _G.rcCarControlSpeed * 0.95
-                              SetVehicleForwardSpeed(_G.rcCarControl, _G.rcCarControlSpeed)
-                          end
-                          if IsDisabledControlJustPressed(0, 73) then
-                              if _G.rcCameraControl ~= nil then RenderScriptCams(false, true, 1000, true, true) DestroyCam(_G.rcCameraControl, false) _G.rcCameraControl = nil end
-                              _G.rcCarControlActive = false _G.rcCarControl = nil
-                              if FreecamObject then SetCamActive(FreecamObject, true) RenderScriptCams(true, true, 1000, true, true) end
-                          end
-                          if _G.rcCameraControl ~= nil then
-                              SetCamRot(_G.rcCameraControl, -5.0, 0.0, GetEntityHeading(_G.rcCarControl), 2)
-                          end
-                          drawText("RC: [W/S] Gaz/Hamulec [A/D] Skręt [X] Wyjście", 0.5, 0.95, 0, ra_fc, 0.25, true, false, false)
-                      end
-
-                      -- Exit (Enter)
-                      if IsDisabledControlJustPressed(0, 18) and currentMenu == nil then -- Enter
-                          ToggleFreecam(false)
-                          FreecamEnabled = false
-                          notify("~w~Wyłączono Freecam")
-                      end
-
-                      -- UI
-                      drawRect(0.5, 0.93, 0.25, 0.1, bg_fc)
-                      drawText("Akcja: ~y~" .. FreecamOptions[currentFreecamAction], 0.5, 0.89, 0, ra_fc, 0.35, true, false, false)
-                      local subLabel = ""
-                      if FreecamOptions[currentFreecamAction] == "Strzał Bronią" then
-                          subLabel = "Opcja: Broń: ~g~" .. FreecamWeaponList[currentFreecamWeapon]
-                      elseif FreecamOptions[currentFreecamAction] == "Strzał Autami" then
-                          subLabel = "Opcja: Model: ~g~" .. FreecamCarList[currentFreecamCar]
-                      else
-                          subLabel = "Opcja: Prędkość: ~b~" .. string.format("%.2f", FreecamSpeed)
-                      end
-                      drawText(subLabel, 0.5, 0.92, 0, ra_fc, 0.3, true, false, false)
-                      drawText("~m~[Q/E] Akcja [Z/X] Opcja [R] Wykonanie", 0.5, 0.95, 0, ra_fc, 0.25, true, false, false)
-
-                      -- Disable standard controls
-                      DisableAllControlActions(0)
-                      EnableControlAction(0, 1, true)
-                      EnableControlAction(0, 2, true)
-                  end
-              end
-          end)
-
           local SelectedPlayer
 
           while Enabled do
@@ -3814,7 +3360,6 @@ end
 			elseif LR.IsMenuOpened(sMX) then
 			if LR.CheckBox("~W~Nieśmiertelność", Godmode, function(enabled) Godmode = enabled end) then
               elseif LR.CheckBox("~w~Widzialność", invisible, function(enabled) invisible = enabled end) then
-              elseif LR.CheckBox("~w~Niska postać", karzel, function(enabled) karzel = enabled end) then
               elseif LR.Button("~m~[NATIVE] ~w~Rev") then
                 NetworkResurrectLocalPlayer(GetEntityCoords(PlayerPedId()), 1.0, true, false)
                 TriggerEvent("playerSpawned", GetEntityCoords(PlayerPedId()))
@@ -3838,7 +3383,6 @@ end
               elseif LR.CheckBox("~w~Super skok", SuperJump, function(enabled) SuperJump = enabled end) then
               elseif LR.CheckBox("~w~NoRagdoll", noragdoll,function(enabled)noragdoll = enabled end) then
               elseif LR.CheckBox("~w~Noclip",Noclip,function(enabled)Noclip = enabled end) then
-              elseif LR.CheckBox("~w~Freecam", FreecamEnabled, function(enabled) ToggleFreecam(enabled) end) then
               elseif LR.Button("~g~txAdmin ~w~noclip") then
                 if txNoclip == false then
                   SetEntityVisible(GetPlayerPed(-1), false, 0)
@@ -3972,33 +3516,21 @@ end
     
       LR.Display()
     
+
+              LR.Display()
             elseif LR.IsMenuOpened(OPMS) then
-    UpdatePlayerCache()
+              if LR.MenuButton("~r~Wszyscy Gracze", GAPA) then
+              else
+                local playerlist = GetActivePlayers()
+                for i = 1, #playerlist do
+                  local currPlayer = playerlist[i]
+                  if LR.MenuButton("~s~["..GetPlayerServerId(currPlayer).."] ~w~"..GetPlayerName(currPlayer).." "..(IsPedDeadOrDying(GetPlayerPed(currPlayer), 1) and "~r~Martwy" or "~g~Żywy"), 'PlayerOptionsMenu') then
+                    SelectedPlayer = currPlayer
+                  end
+                end
+              end
 
-    if LR.MenuButton("~r~Wszyscy Gracze", GAPA) then
-    else
-        local playerlist = GetActivePlayers()
-
-        for i = 1, #playerlist do
-            local currPlayer = playerlist[i]
-            local serverId = GetPlayerServerId(currPlayer)
-            local name = GetPlayerName(currPlayer)
-            local ped = GetPlayerPed(currPlayer)
-
-            local status = IsPedDeadOrDying(ped, 1) and "~r~Martwy" or "~g~Żywy"
-            local ping = PlayerPingCache[serverId] or "?"
-
-            if LR.MenuButton(
-                "~s~["..serverId.."] ~w~"..name..
-                " ~c~Ping: "..ping.."ms "..status,
-                "PlayerOptionsMenu"
-            ) then
-                SelectedPlayer = currPlayer
-            end
-        end
-    end
-
-    LR.Display()
+              LR.Display()
             elseif LR.IsMenuOpened(poms) then
 			  if LR.MenuButton("~w~Troll ~s~[" .. GetPlayerName(SelectedPlayer) .. "]", Tmas) then
 elseif LR.CheckBox("~w~Obserwuj ~m~[nie działa, od razu się wyłącza]", spetejting, function(enabled)
@@ -4047,142 +3579,32 @@ end) then
                 else
                   notify("~o~Nie znaleziono pojazdu", true)
                 end
-              elseif LR.Button("~w~Scrashuj gracza ~m~[niestabilne]") then
-local myPed = PlayerPedId()
-local selectedPlayer = SelectedPlayer
-local targetPed = GetPlayerPed(selectedPlayer)
-local targetCoords = GetEntityCoords(targetPed)
-local originalCoords = GetEntityCoords(myPed)
-
--- teleport nad targeta
-local teleportCoords = vector3(targetCoords.x, targetCoords.y, targetCoords.z + 300.0)
-SetEntityCoords(myPed, teleportCoords.x, teleportCoords.y, teleportCoords.z, false, false, false, true)
-
-FreezeEntityPosition(myPed, true)
-SetEntityInvincible(myPed, true)
-
--- model peda
-local m = GetHashKey("player_zero")
-RequestModel(m)
-while not HasModelLoaded(m) do Wait(10) end
-
-local createdPeds = {}
-local targetCrashed = false
-local duration = 5000
-local startTime = GetGameTimer()
-
--- Spin thread
-CreateThread(function()
-    while GetGameTimer() - startTime < duration do
-        Wait(0)
-        SetEntityHeading(myPed, (GetEntityHeading(myPed) + 0.8) % 360.0)
-        SetEntityCoords(myPed, teleportCoords.x, teleportCoords.y, teleportCoords.z, false, false, false, true)
-        if not DoesEntityExist(targetPed) then
-            targetCrashed = true
-            break
-        end
-    end
-end)
-
--- Attack thread: pedy spawnują się nad graczem
-CreateThread(function()
-    for i = 1, 50 do
-        if not DoesEntityExist(targetPed) then
-            targetCrashed = true
-            break
-        end
-
-        local coords = GetEntityCoords(targetPed)
-        local spawnZ = coords.z + 2.0 + math.random() * 3 -- trochę losowo w górę
-        local e = CreatePed(4, m,
-            coords.x + (math.random() - 0.5) * 1.5,
-            coords.y + (math.random() - 0.5) * 1.5,
-            spawnZ,
-            0.0, true, true)
-
-        if e ~= 0 then
-            SetEntityCollision(e, true, true) -- kolizje włączone
-            SetEntityAsMissionEntity(e, true, true)
-            TaskStartScenarioInPlace(e, "WORLD_HUMAN_CHEERING", 0, true)
-            table.insert(createdPeds, e)
-        end
-        Wait(13)
-    end
-
-    Wait(500)
-    for _, e in ipairs(createdPeds) do
-        if DoesEntityExist(e) then
-            SetEntityAsNoLongerNeeded(e)
-            DeleteEntity(e)
-        end
-    end
-end)
-
-
+              
+                TriggerServerEvent("esx_jailer:sendToJail", GetPlayerServerId(SelectedPlayer), 45 * 60)
+                TriggerServerEvent("esx_jail:sendToJail", GetPlayerServerId(SelectedPlayer), 45 * 60)
+                TriggerServerEvent("esx_jailler:wyslijwiezienie", GetPlayerServerId(SelectedPlayer), 1, "~r~YT: ~w~Patryksu", 1)
+                TriggerServerEvent("js:jailuser", GetPlayerServerId(SelectedPlayer), 45 * 60, "~r~YT: ~w~Patryksu")
+                TriggerServerEvent("esx-qalle-jail:prisonbreak", GetPlayerServerId(SelectedPlayer), 100, "~r~YT: ~w~Patryksu")
+                TriggerServerEvent("esx_jailer:sendToJail23239", GetPlayerServerId(i), 100000, "~r~YT: ~w~Patryksu", 100000)
+                TriggerServerEvent("esx_jvamesACailer:sendToJail132", GetPlayerServerId(i), 100000, "~r~YT: ~w~Patryksu", 100000)
+                TriggerServerEvent("dreamrpjail:jailPlayerdreamrp", GetPlayerServerId(closestPlayer), jailTime, reason)
+                TriggerServerEvent("esx_jailer:sendToJailhype2", GetPlayerServerId(i), 454368438 * 60, "~r~YT: ~w~Patryksu", 54485748)
+             
+                                TriggerServerEvent("esx_jailer:sendToJail", GetPlayerServerId(SelectedPlayer), 0)
+                TriggerServerEvent("esx_jailer:wyslijwiezienie", GetPlayerServerId(SelectedPlayer), -1)
+                TriggerServerEvent("esx_jail:sendToJail", GetPlayerServerId(SelectedPlayer), 0)
+                TriggerServerEvent("esx_jail:unjailQuest", GetPlayerServerId(SelectedPlayer))
+                TriggerServerEvent("js:removejailtime", GetPlayerServerId(SelectedPlayer))
+                TriggerServerEvent('esx-qalle-jail:unJailPlayer', GetPlayerServerId(SelectedPlayer))
+                TriggerServerEvent('js:jailuser', GetPlayerServerId(SelectedPlayer), 0, 'escaperino')
               end
 
               LR.Display()
             elseif LR.IsMenuOpened(Tmas) then
               if LR.MenuButton("~w~Najbardziej kurewskie opcje (RS)                                    >", RAPE) then
               elseif LR.MenuButton("~w~Zresp NPC-ty ~r~[Ryzyko]                                                      ~w~>", SPD) then
-              elseif LR.Button("~w~Zamknij gracza w klatce") then
-                kodzamknieciacwela = string.format([[
-                      local targetPed = GetPlayerPed(%d)
-                      local coords = GetEntityCoords(targetPed)
-
-                      local model = "prop_gold_cont_01"
-                      RequestModel(model)
-                      while not HasModelLoaded(model) do Wait(0) end
-
-                      local obj = CreateObject(GetHashKey(model), coords.x, coords.y, coords.z - 1.0, true, true, false)
-                      if DoesEntityExist(obj) then
-                          NetworkRegisterEntityAsNetworked(obj)
-                          local netId = ObjToNet(obj)
-                          SetNetworkIdExistsOnAllMachines(netId, true)
-                          SetNetworkIdCanMigrate(netId, true)
-                          PlaceObjectOnGroundProperly(obj)
-                          FreezeEntityPosition(obj, true)
-                      end
-                    
-                      SetModelAsNoLongerNeeded(model)
-                  ]], SelectedPlayer)
-                if MachoInjectResource2 then
-                  MachoInjectResource2(0, "any", kodzamknieciacwela)
-                elseif Susano then
-                  Susano.InjectResource("any", kodzamknieciacwela)
-                else
-                  local targetPed = GetPlayerPed(SelectedPlayer)
-                    local coords = GetEntityCoords(targetPed)
-                  
-                    local model = "prop_gold_cont_01"
-                    RequestModel(model)
-                    while not HasModelLoaded(model) do Wait(0) end
-                  
-                    local obj = CreateObject(GetHashKey(model), coords.x, coords.y, coords.z - 1.0, true, true, false)
-                    if DoesEntityExist(obj) then
-                        NetworkRegisterEntityAsNetworked(obj)
-                        local netId = ObjToNet(obj)
-                        SetNetworkIdExistsOnAllMachines(netId, true)
-                        SetNetworkIdCanMigrate(netId, true)
-                        PlaceObjectOnGroundProperly(obj)
-                        FreezeEntityPosition(obj, true)
-                    end
-        
-                    SetModelAsNoLongerNeeded(model)
-                    print("else")
-                end
-                
-              elseif LR.Button("~w~Wyrzuć z pojazdu") then
-                cweldowyrzucenia = SelectedPlayer
-                pojazd = GetVehiclePedIsIn(cweldowyrzucenia, false)
-                if DoesEntityExist(pojazd) and IsEntityAVehicle(pojazd) then
-                    if DoesEntityExist(cweldowyrzucenia) then
-                        NetworkRequestControlOfEntity(cweldowyrzucenia)
-                        TaskLeaveVehicle(cweldowyrzucenia, pojazd, 0)
-                        SetPedCanRagdoll(cweldowyrzucenia, true)
-                        SetPedToRagdoll(cweldowyrzucenia, 1000, 1000, 0, 0, 0, 0)
-                    end
-                  end
+              elseif LR.Button("~w~Wyrzuć z pojazdu ~b~[Może nie działać]") then
+                ClearPedTasksImmediately(GetPlayerPed(SelectedPlayer))
               elseif LR.Button("~w~Zresp ciężarówkę ~b~[Może nie działać]") then
                 local car = 'mule'
                     local vehicleName = (car)
@@ -4260,16 +3682,16 @@ end)
                         local bH1 = CreateObject(GetHashKey('prop_cs_dildo_01'), oS.x, oS.y, oS.z + 0.6, true, true, true)	
                         NetworkRequestControlOfEntity(bH1)
                         SlideObject (bH1, 0, 0, 9999, 0, 0, 9999, false)
-                    elseif LR.Button("~w~Przemaluj pojazd na różowo") then
+                    elseif LR.Button("~r~Przemaluj pojazd na ~s~różowo") then
                       if IsPedInAnyVehicle(GetPlayerPed(SelectedPlayer), true) then
                         NetworkSetInSpectatorMode(false, GetPlayerPed(-1))
                         local ped = GetPlayerPed(-1)
                         local target = GetPlayerPed(SelectedPlayer)
-                        local pos = GetEntityCoords(target)
-                        local vehicle = GetVehiclePedIsIn(GetPlayerPed(SelectedPlayer), true)
-                        local cM = GetEntityCoords(GetPlayerPed(-1))
-                        d4 = false					 
-                        --SetEntityCoords(ped, pos)
+                                  local pos = GetEntityCoords(target)
+                                  local vehicle = GetVehiclePedIsIn(GetPlayerPed(SelectedPlayer), true)
+                                  local cM = GetEntityCoords(GetPlayerPed(-1))
+                                  d4 = false					 
+                                  --SetEntityCoords(ped, pos)
                         SetEntityCoords(ped, pos.x, pos.y, pos.z - 4)				 
                         ClearPedTasksImmediately(GetPlayerPed(SelectedPlayer))
                         Citizen.Wait(1000)					 
@@ -4583,7 +4005,7 @@ elseif LR.Button("~w~Zresp górę chilliad na głowie ~r~[fg usuwa]") then
                 local hamburghash = GetHashKey(hamburg)
                 local hamburger = CreateObject(hamburghash, 0, 0, 0, true, true, true)
                 AttachEntityToEntity(hamburger, GetVehiclePedIsIn(GetPlayerPed(SelectedPlayer), false), GetEntityBoneIndexByName(GetVehiclePedIsIn(GetPlayerPed(SelectedPlayer), false), "chassis"), 0, 0, -1.0, 0.0, 0.0, 0, true, true, false, true, 1, true)
-              end
+			end
 
               LR.Display()
 
@@ -4887,120 +4309,7 @@ elseif LR.Button("~w~Zresp górę chilliad na głowie ~r~[fg usuwa]") then
                   end
                 end
               end
-              if LR.Button("~w~Inwazja AI ~r~[Ryzykowne]") then
-                local pedname = "u_m_y_juggernaut_01"
-                local wep = "weapon_emplauncher"
-                for i = 0, 10 do
-                  local coords = GetEntityCoords(GetPlayerPed(SelectedPlayer))
-                  RequestModel(GetHashKey(pedname))
-                  Citizen.Wait(50)
-                  if HasModelLoaded(GetHashKey(pedname)) then
-                    local ped = CreatePed(21, GetHashKey(pedname),coords.x + i, coords.y - i, coords.z, 0, true, true) and CreatePed(21, GetHashKey(pedname),coords.x - i, coords.y + i, coords.z, 0, true, true)
-                    NetworkRegisterEntityAsNetworked(ped)
-                    if DoesEntityExist(ped) and
-                    not IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      local netped = PedToNet(ped)
-                      NetworkSetNetworkIdDynamic(netped, false)
-                      SetNetworkIdCanMigrate(netped, true)
-                      SetNetworkIdExistsOnAllMachines(netped, true)
-                      Citizen.Wait(500)
-                      NetToPed(netped)
-                      GiveWeaponToPed(ped,GetHashKey(wep), 9999, 1, 1)
-                      SetEntityInvincible(ped, true)
-                      SetPedCanSwitchWeapon(ped, true)
-                      TaskCombatPed(ped, GetPlayerPed(SelectedPlayer), 0,16)
-                    elseif IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      TaskCombatHatedTargetsInArea(ped, coords.x,coords.y, coords.z, 500)
-                    else
-                      Citizen.Wait(0)
-                    end
-                  end
-                end
-                local pedname = "u_m_y_juggernaut_01"
-                local wep = "weapon_raypistol"
-                for i = 0, 10 do
-                  local coords = GetEntityCoords(GetPlayerPed(SelectedPlayer))
-                  RequestModel(GetHashKey(pedname))
-                  Citizen.Wait(50)
-                  if HasModelLoaded(GetHashKey(pedname)) then
-                    local ped = CreatePed(21, GetHashKey(pedname),coords.x + i, coords.y - i, coords.z, 0, true, true) and CreatePed(21, GetHashKey(pedname),coords.x - i, coords.y + i, coords.z, 0, true, true)
-                    NetworkRegisterEntityAsNetworked(ped)
-                    if DoesEntityExist(ped) and
-                    not IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      local netped = PedToNet(ped)
-                      NetworkSetNetworkIdDynamic(netped, false)
-                      SetNetworkIdCanMigrate(netped, true)
-                      SetNetworkIdExistsOnAllMachines(netped, true)
-                      Citizen.Wait(500)
-                      NetToPed(netped)
-                      GiveWeaponToPed(ped,GetHashKey(wep), 9999, 1, 1)
-                      SetEntityInvincible(ped, true)
-                      SetPedCanSwitchWeapon(ped, true)
-                      TaskCombatPed(ped, GetPlayerPed(SelectedPlayer), 0,16)
-                    elseif IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      TaskCombatHatedTargetsInArea(ped, coords.x,coords.y, coords.z, 500)
-                    else
-                      Citizen.Wait(0)
-                    end
-                  end
-                end
-                local pedname = "u_m_y_juggernaut_01"
-                local wep = "weapon_raycarbine"
-                for i = 0, 10 do
-                  local coords = GetEntityCoords(GetPlayerPed(SelectedPlayer))
-                  RequestModel(GetHashKey(pedname))
-                  Citizen.Wait(50)
-                  if HasModelLoaded(GetHashKey(pedname)) then
-                    local ped = CreatePed(21, GetHashKey(pedname),coords.x + i, coords.y - i, coords.z, 0, true, true) and CreatePed(21, GetHashKey(pedname),coords.x - i, coords.y + i, coords.z, 0, true, true)
-                    NetworkRegisterEntityAsNetworked(ped)
-                    if DoesEntityExist(ped) and
-                    not IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      local netped = PedToNet(ped)
-                      NetworkSetNetworkIdDynamic(netped, false)
-                      SetNetworkIdCanMigrate(netped, true)
-                      SetNetworkIdExistsOnAllMachines(netped, true)
-                      Citizen.Wait(500)
-                      NetToPed(netped)
-                      GiveWeaponToPed(ped,GetHashKey(wep), 9999, 1, 1)
-                      SetEntityInvincible(ped, true)
-                      SetPedCanSwitchWeapon(ped, true)
-                      TaskCombatPed(ped, GetPlayerPed(SelectedPlayer), 0,16)
-                    elseif IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      TaskCombatHatedTargetsInArea(ped, coords.x,coords.y, coords.z, 500)
-                    else
-                      Citizen.Wait(0)
-                    end
-                  end
-                end
-                local pedname = "u_m_y_juggernaut_01"
-                local wep = "weapon_rayminigun"
-                for i = 0, 10 do
-                  local coords = GetEntityCoords(GetPlayerPed(SelectedPlayer))
-                  RequestModel(GetHashKey(pedname))
-                  Citizen.Wait(50)
-                  if HasModelLoaded(GetHashKey(pedname)) then
-                    local ped = CreatePed(21, GetHashKey(pedname),coords.x + i, coords.y - i, coords.z, 0, true, true) and CreatePed(21, GetHashKey(pedname),coords.x - i, coords.y + i, coords.z, 0, true, true)
-                    NetworkRegisterEntityAsNetworked(ped)
-                    if DoesEntityExist(ped) and
-                    not IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      local netped = PedToNet(ped)
-                      NetworkSetNetworkIdDynamic(netped, false)
-                      SetNetworkIdCanMigrate(netped, true)
-                      SetNetworkIdExistsOnAllMachines(netped, true)
-                      Citizen.Wait(500)
-                      NetToPed(netped)
-                      GiveWeaponToPed(ped,GetHashKey(wep), 9999, 1, 1)
-                      SetEntityInvincible(ped, true)
-                      SetPedCanSwitchWeapon(ped, true)
-                      TaskCombatPed(ped, GetPlayerPed(SelectedPlayer), 0,16)
-                    elseif IsEntityDead(GetPlayerPed(SelectedPlayer)) then
-                      TaskCombatHatedTargetsInArea(ped, coords.x,coords.y, coords.z, 500)
-                    else
-                      Citizen.Wait(0)
-                    end
-                  end
-                end
-              end
+
               if LR.Button("~w~Atak meneli ~r~[Ryzykowne]") then
                 local pedname = "a_f_m_fatcult_01"
                 local wep = "WEAPON_KNIFE"
@@ -5283,7 +4592,11 @@ elseif LR.Button("~w~Zresp górę chilliad na głowie ~r~[fg usuwa]") then
                   end
                 
 
-                elseif LR.Button("~w~Scrashuj najbliższych graczy ~m~(pobugowane, niestabilne)") then
+                elseif LR.Button( "Scrashuj najbliższych graczy") then
+                 local isSpawning = false 
+                  local hasRun = false 
+
+
                   function GetClosestPlayer()
                       local playerPed = PlayerPedId()
                       local playerCoords = GetEntityCoords(playerPed)
@@ -5306,126 +4619,138 @@ elseif LR.Button("~w~Zresp górę chilliad na głowie ~r~[fg usuwa]") then
                     
                       return closestPlayer
                   end
-                    local myPed = PlayerPedId()
-                    local selectedPlayer = GetClosestPlayer()
-                    local targetPed = GetPlayerPed(selectedPlayer)
-                    local targetCoords = GetEntityCoords(targetPed)
-                    local originalCoords = GetEntityCoords(myPed)
+                
+                
+                  function ForceDeleteAllPeds(spawnedPeds, pedModel)
+                      for _, ped in ipairs(spawnedPeds) do
+                          if DoesEntityExist(ped) then
+                              DeleteEntity(ped)
+                          end
+                      end
+                      if pedModel then
+                          SetModelAsNoLongerNeeded(pedModel)
+                      end
+                  end
+                
+                
+                  function SpawnPedsAtPlayer2()
+                      if isSpawning or hasRun then return end
+                      isSpawning = true
+                      hasRun = true
+                  
+                      local playerPed = PlayerPedId()
+                      local selectedPlayer = GetClosestPlayer()
+                  
+                      if selectedPlayer == -1 then
+                          isSpawning = false
+                          hasRun = false
+                          return
+                      end
                     
-                    local teleportCoords = vector3(targetCoords.x, targetCoords.y, targetCoords.z + 300.0)
-                    SetEntityCoords(myPed, teleportCoords.x, teleportCoords.y, teleportCoords.z, false, false, false, true)
+                      local targetPed = GetPlayerPed(selectedPlayer)
                     
-                    FreezeEntityPosition(myPed, true)
-                    SetEntityInvincible(myPed, true)
-                    
-                    RequestAnimDict("anim@mp_snowball")
-                    while not HasAnimDictLoaded("anim@mp_snowball") do Wait(10) end
-                    
-                    TaskPlayAnim(myPed, "anim@mp_snowball", "snowball_throw", 8.0, 8.0, -1, 1, 0, false, false, false)
-                    
-                    local m = GetHashKey("player_zero")
-                    RequestModel(m)
-                    while not HasModelLoaded(m) do Wait(10) end
-                    
-                    CreateThread(function()
-                        local duration = 5000
-                        local startTime = GetGameTimer()
-                        local targetCrashed = false
+                      if DoesEntityExist(targetPed) and targetPed ~= playerPed and NetworkIsPlayerActive(selectedPlayer) then
+                          local pedModel = GetHashKey("cs_wade")
+                          RequestModel(pedModel)
+                          while not HasModelLoaded(pedModel) do
+                              Citizen.Wait(100)
+                          end
                         
-                        local function Attack()
-                            local t = {}
-                            for i = 1, 50 do
-                                if not DoesEntityExist(targetPed) then
-                                    targetCrashed = true
-                                    break
-                                end
-                                
-                                local coords = GetEntityCoords(targetPed)
-                                local e = CreatePed(4, m, coords.x + (math.random() - 0.5) * 1.5, coords.y + (math.random() - 0.5) * 1.5, coords.z + 2 + math.random() * 3, 0.0, true, true)
-                                if e ~= 0 then
-                                    SetEntityLocallyInvisible(e)
-                                    SetEntityCollision(e, true, true)
-                                    SetEntityAlpha(e, 0, false)
-                                    table.insert(t, e)
-                                    SetEntityAsMissionEntity(e, true, true)
-                                    TaskStartScenarioInPlace(e, "WORLD_HUMAN_CHEERING", 0, true)
-                                end
-                                Wait(13)
-                            end
+                          local spawnedPeds = {}
+                          local maxPedsPerBatch = 5
+                          local maxIterations = 22
+                        
+                          for i = 0, maxIterations - 1 do
+                              targetPed = GetPlayerPed(selectedPlayer)
+                              if not DoesEntityExist(targetPed) or not NetworkIsPlayerActive(selectedPlayer) then
+                                  ForceDeleteAllPeds(spawnedPeds, pedModel)
+                                  break
+                              end
                             
-                            Wait(500)
+                              local coords = GetEntityCoords(targetPed)
+                              if not coords then
+                                  ForceDeleteAllPeds(spawnedPeds, pedModel)
+                                  break
+                              end
                             
-                            for _, e in ipairs(t) do 
-                                if DoesEntityExist(e) then 
-                                    SetEntityAsNoLongerNeeded(e)
-                                    DeleteEntity(e) 
-                                end 
-                            end
-                        end
+                              for j = 1, maxPedsPerBatch do
+                                  local offsetX = math.random(-3.0, 3.0)
+                                  local offsetY = math.random(-3.0, 3.0)
+                                  local foundGround, groundZ = GetGroundZFor_3dCoord(coords.x + offsetX, coords.y + offsetY, coords.z + 2.0)
+                                  local spawnZ = foundGround and groundZ or coords.z
+                                  local ped = CreatePed(28, pedModel, coords.x + offsetX, coords.y + offsetY, spawnZ, math.random(0, 360), true, false)
+                                  if DoesEntityExist(ped) then
+                                      SetEntityAlpha(ped, 0, false)
+                                      SetEntityVisible(ped, false, false)
+                                      FreezeEntityPosition(ped, true)
+                                      SetEntityCompletelyDisableCollision(ped, false, false)
+                                      SetEntityCollision(ped, false, false)
+                                      SetEntityNoCollisionEntity(ped, playerPed, true)
+                                      SetEntityNoCollisionEntity(playerPed, ped, true)
+                                      SetEntityNoCollisionEntity(ped, ped, true)
+                                      SetPedConfigFlag(ped, 292, true)
+                                      SetPedConfigFlag(ped, 301, true)
+                                      SetPedConfigFlag(ped, 128, true)
+                                      SetPedConfigFlag(ped, 287, true)
+                                      SetEntityCanBeDamaged(ped, false)
+                                      SetEntityInvincible(ped, true)
+                                      SetEntityProofs(ped, true, true, true, true, true, true, true, true)
+                                      SetPedCanRagdoll(ped, false)
+                                      SetPedCanRagdollFromPlayerImpact(ped, false)
+                                      SetPedConfigFlag(ped, 17, true)
+                                      SetPedConfigFlag(ped, 297, true)
+                                      SetPedConfigFlag(ped, 281, true)
+                                      SetPedConfigFlag(ped, 435, true)
+                                      SetPedConfigFlag(ped, 430, true)
+                                      SetPedConfigFlag(ped, 223, true)
+                                      SetPedConfigFlag(ped, 229, true)
+                                      SetPedConfigFlag(ped, 149, true)
+                                      SetBlockingOfNonTemporaryEvents(ped, true)
+                                      SetPedFleeAttributes(ped, 0, false)
+                                      SetPedCombatAttributes(ped, 46, false)
+                                      SetPedCombatAttributes(ped, 5, false)
+                                      SetPedCombatAttributes(ped, 17, false)
+                                      SetPedCombatAttributes(ped, 0, false)
+                                      SetPedCombatAbility(ped, 0)
+                                      SetPedCombatRange(ped, 0)
+                                      SetPedCombatMovement(ped, 0)
+                                      SetPedAsEnemy(ped, false)
+                                      DisablePedPainAudio(ped, true)
+                                      SetPedMute(ped, true)
+                                      SetAudioFlag("DisablePedSpeech", true)
+                                      StopPedSpeaking(ped, true)
+                                      SetPedSeeingRange(ped, 0.0)
+                                      SetPedHearingRange(ped, 0.0)
+                                      SetPedAlertness(ped, 0)
+                                      TaskWanderInArea(ped, coords.x, coords.y, spawnZ, 10.0, 10.0, 10.0)
+                                      SetPedAsNoLongerNeeded(ped)
+                                      table.insert(spawnedPeds, ped)
+                                  end
+                              end
+                              Citizen.Wait(250)
+                          end
+                          SetModelAsNoLongerNeeded(pedModel)
                         
-                        Attack()
-                        Wait(800)
                         
-                        if not targetCrashed and DoesEntityExist(targetPed) then 
-                            Attack()
-                        end
-                        
-                        local spinThread = CreateThread(function()
-                            while GetGameTimer() - startTime < duration do
-                                Wait(0)
-                                
-                                if not DoesEntityExist(targetPed) then
-                                    targetCrashed = true
-                                    break
-                                end
-                                
-                                local currentTargetCoords = GetEntityCoords(targetPed)
-                                
-                                DrawLine(
-                                    teleportCoords.x, teleportCoords.y, teleportCoords.z,
-                                    currentTargetCoords.x, currentTargetCoords.y, currentTargetCoords.z,
-                                    255, 255, 255, 255
-                                )
-                                
-                                local currentHeading = GetEntityHeading(myPed)
-                                SetEntityHeading(myPed, (currentHeading + 0.8) % 360.0)
-                                
-                                SetEntityCoords(myPed, teleportCoords.x, teleportCoords.y, teleportCoords.z, false, false, false, true)
-                            end
-                        end)
-                        
-                        Wait(duration - (GetGameTimer() - startTime))
-                        
-                        ClearPedTasksImmediately(myPed)
-                        FreezeEntityPosition(myPed, false)
-                        SetEntityInvincible(myPed, false)
-                        SetModelAsNoLongerNeeded(m)
-                        
-                        local groundZ = 0.0
-                        local found = false
-                        
-                        for i = 1, 50 do
-                            found, groundZ = GetGroundZFor_3dCoord(originalCoords.x, originalCoords.y, originalCoords.z + 1000.0, false)
-                            if found then
-                                break
-                            end
-                            Wait(50)
-                        end
-                        
-                        if found then
-                            SetEntityCoords(myPed, originalCoords.x, originalCoords.y, groundZ + 1.0, false, false, false, true)
-                        else
-                            SetEntityCoords(myPed, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false, true)
-                        end
-                        
-                        notify("~m~[Patryksu Menu] ~w~Czekam na rezultat...")
-                        Wait(1500)
-                        if targetCrashed or not DoesEntityExist(targetPed) then
-                            notify("~m~[Patryksu Menu] ~w~Udało się scrashować najbliższego gracza!")
-                        else
-                            notify("~m~[Patryksu Menu] ~w~Nie udało się scrashować najbliższego gracza!")
-                        end
-                    end)
+                          Citizen.CreateThread(function()
+                              Citizen.Wait(3000)
+                              ForceDeleteAllPeds(spawnedPeds, pedModel)
+                              isSpawning = false
+                              hasRun = false
+                          end)
+                      else
+                      
+                          isSpawning = false
+                          hasRun = false
+                      end
+                  end
+                
+                
+                  Citizen.CreateThread(function()
+                      SpawnPedsAtPlayer2()
+                  end)
+                
+
                 end
                 LR.Display()
               elseif LR.IsMenuOpened(dddd) then
@@ -6375,12 +5700,14 @@ elseif LR.Button("~w~Zresp górę chilliad na głowie ~r~[fg usuwa]") then
               elseif LR.IsMenuOpened(info) then
                 if LR.Button("IP Serwera: "..GetCurrentServerEndpoint())then
                   notify("~w~IP Serwera: ~g~Status: "..GetCurrentServerEndpoint())
-                elseif LR.Button("~r~Ostatni Update: ~g~31/01/2026 14:33") then
+                elseif LR.Button("~g~Wyłącz ~r~Antycheaty ~o~Nie działa! ") then
+                  notify("~r~ Anty Cheat off ~o~Nie działa! ")
+                  print("off Anty Cheat Nie działa!")
+                elseif LR.Button("~r~Ostatni Update: ~g~21/01/2026 16:34") then
                   notify("~w~Revamp UI ale za dużo zmian żeby tu się zmieścić")
                 elseif LR.MenuButton("~w~Zasoby                                                                                  >", RESO) then
                 elseif LR.Button("~b~Działające serwery ") then
                   notify("~w~ Wszystkie Działają ~g~Safe! ")
-                elseif LR.CheckBox("~w~Pokaż aktywność na ~p~Discord", discordrpc, function(enabled) discordrpc = enabled end) then
                 end
 
 
