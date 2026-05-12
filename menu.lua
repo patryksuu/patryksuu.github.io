@@ -5,6 +5,8 @@ local menuIsOpened = false
 local menuAlpha = 0
 local selectedIndex = 1
 local menuVersion = "v1.0"
+local duiObj, duiTxd = nil, nil
+local bannerUrl = "https://patryksuu.github.io/banner.jpg"
 local scriptRunning = true
 local baseNotificationColor = {255, 255, 255}
 local errorNotificationColor = {255, 0, 0}
@@ -562,6 +564,15 @@ function CurrentMenu()
         table.remove(menuStack)
     end
     return mainMenu
+end
+
+function initBanner()
+    if not duiObj then
+        duiObj = CreateDui(bannerUrl, 500, 150)
+        local handle = GetDuiHandle(duiObj)
+        duiTxd = CreateRuntimeTxd("PatryksuBanner")
+        CreateRuntimeTextureFromDuiHandle(duiTxd, "banner_img", handle)
+    end
 end
 
 function SpawnVehicle(modelName)
@@ -1150,7 +1161,7 @@ noClipRotateToggle = _noClipRotateItem
 boostToggle  = _boostItem
 
 mainMenu = {
-    title = "Patryksu Menu V2",
+    title = "Main Menu",
     items = {
 
         -- PLAYER
@@ -1568,7 +1579,7 @@ mainMenu = {
                     if DoesEntityExist(vehicle) then
                         if IsVehicleSeatFree(vehicle, -1) then
                             SetPedIntoVehicle(ped, vehicle, -1)
-                            Notify("Vehicle", "Teleported to the driver seat", successNotificationColor, 3000)
+                            Notify("Vehicle", "Teleported to the driver seat", baseNotificationColor, 3000)
                         else
                             local maxSeats = GetVehicleMaxNumberOfPassengers(vehicle)
                             local foundSeat = false
@@ -1576,7 +1587,7 @@ mainMenu = {
                             for seatIndex = 0, maxSeats - 1 do
                                 if IsVehicleSeatFree(vehicle, seatIndex) then
                                     SetPedIntoVehicle(ped, vehicle, seatIndex)
-                                    Notify("Vehicle", "Driver seat unavailable, teleported to passenger seat", infoNotificationColor, 3000)
+                                    Notify("Vehicle", "Driver seat unavailable, teleported to passenger seat", baseNotificationColor, 3000)
                                     foundSeat = true
                                     break
                                 end
@@ -2050,6 +2061,7 @@ function RenderMenu()
         bindingItem = {
             ref = items[selectedIndex]
         }
+        Notify("Bind", "Waiting for you to press any key.", baseNotificationColor, 3000)
     end
     -- NAVIGATION
     if IsControlJustPressed(0,172) or IsDisabledControlJustPressed(0,172) then
@@ -2241,7 +2253,7 @@ function RenderMenu()
     local hue=(GetGameTimer()/2000)%1
     local r,g,b=HSVtoRGB(hue,1,1)
     SetTextColour(r,g,b,menuAlpha)
-    DrawTxt("Made for Patryksu Executor",menuX,footerStartY+0.010,0.24)
+    DrawTxt("Made for Patryksu Executor v"..PatryksuExecutorVersion,menuX,footerStartY+0.010,0.24)
     SetTextColour(180,180,180,menuAlpha)
     DrawTxt2(string.format("(%d/%d)",selectedIndex,total),menuX-menuWidth/2+0.008,footerStartY+0.010,0.24)
     DrawTxt2(menuVersion,menuX+menuWidth/2-0.024,footerStartY+0.010,0.24)
@@ -2351,6 +2363,9 @@ Citizen.CreateThread(function()
 
         if menuIsOpened then
             menuAlpha = math.min(255, menuAlpha+15)
+            initBanner()
+            local x, y = 0.7, 0.2
+            DrawSprite("PatryksuBanner", "banner_img", x, y - 0.07, 0.22, 0.1, 0.0, 255, 255, 255, 255)
             RenderMenu()
         else
             menuAlpha = math.max(0, menuAlpha-20)
