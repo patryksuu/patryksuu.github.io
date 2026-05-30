@@ -2419,7 +2419,7 @@ function RenderMenu()
 
     local items = menu.items
     local total = #items
-    if IsControlJustPressed(0, 167) then
+    if IsControlJustPressed(0, 167) or IsDisabledControlJustPressed(0, 167) then
         bindingItem = {
             ref = items[selectedIndex]
         }
