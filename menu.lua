@@ -515,6 +515,18 @@ local noReload = nil
 local infiniteAmmo = nil
 local noSpread = nil
 local noRecoil = nil
+local freecamOptions = { "Default", "Teleport", "Shoot Weapon", "Shoot Vehicle", "Vehicle kick", "Delete Vehicle", "Destroy Vehicle", "Remote Control", "Steal Vehicle" }
+local freecamWeaponList = { "WEAPON_VINTAGEPISTOL", "WEAPON_SNSPISTOL_MK2", "WEAPON_SNSPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL", "WEAPON_SMG", "WEAPON_ASSAULTRIFLE", "WEAPON_PUMPSHOTGUN", "WEAPON_HEAVYSNIPER_MK2", "WEAPON_STUNGUN" }
+local freecamCarList = { "adder", "nimbus", "kuruma", "rhino", "lazer", "buzzard" }
+local currentFreecamCar = 1
+local blackholePressed = false
+local blackholeControlledVehicles = {}
+local blackholeFrameCount = 0
+local currentFreecamAction = 1
+local currentFreecamWeapon = 1
+local freecamSpeed = 0.5
+local freecamEnabled = false
+local freecamObject = nil
 
 --[[
 HELPERS
@@ -690,6 +702,58 @@ function DrawAimbotFOV(x, y, radius, r, g, b, a)
     end
 end
 
+local function RotationToDirection(rotation)
+    local retz = math.rad(rotation.z)
+    local retx = math.rad(rotation.x)
+    local absx = math.abs(math.cos(retx))
+    return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, math.sin(retx))
+end
+
+local function GetRightVector(rotation)
+    local retz = math.rad(rotation.z + 90.0)
+    local retx = math.rad(rotation.x)
+    local absx = math.abs(math.cos(retx))
+    return vector3(-math.sin(retz) * absx, math.cos(retz) * absx, 0.0)
+end
+
+local function ToggleFreecam(state)
+    if state then
+        freecamEnabled = true
+        local coords = GetEntityCoords(PlayerPedId())
+        freecamObject = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
+        SetCamCoord(freecamObject, coords.x, coords.y, coords.z + 2.0)
+        SetCamRot(freecamObject, 0.0, 0.0, GetEntityHeading(PlayerPedId()), 2)
+        RenderScriptCams(true, false, 0, true, true)
+    else
+        freecamEnabled = false
+        RenderScriptCams(false, false, 0, true, true)
+        if freecamObject then 
+            DestroyCam(freecamObject, false) 
+            freecamObject = nil 
+        end
+        if _G.rcCarControlActive then
+            if _G.rcCameraControl ~= nil then
+                RenderScriptCams(false, true, 1000, true, true)
+                DestroyCam(_G.rcCameraControl, false)
+                _G.rcCameraControl = nil
+            end
+            _G.rcCarControlActive = false
+            _G.rcCarControl = nil
+        end
+        ClearFocus()
+        SetFocusEntity(PlayerPedId())
+    end
+end
+
+local function RaycastFromCam(cam, distance)
+    local coords = GetCamCoord(cam)
+    local rotation = GetCamRot(cam, 2)
+    local direction = RotationToDirection(rotation)
+    local destination = coords + (direction * distance)
+    local ray = StartShapeTestRay(coords.x, coords.y, coords.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 0)
+    local _, hit, endCoords, _, entity = GetShapeTestResult(ray)
+    return hit, endCoords, entity
+end
 
 --[[
 BUILDER FUNCTIONS
@@ -1188,6 +1252,8 @@ mainMenu = {
                     _noClipRotateItem,
                   }
                 },
+                { type = "toggle", label = "Freecam", description = "Toggle freecam", 
+                    action = function() ToggleFreecam(not freecamEnabled); Notify("Player", "Freecam: " ..(freecamEnabled and "ON" or "OFF"), baseNotificationColor) end },
                 {
                     type="button", label="Heal", description="Restore player health to full",
                     action=function()
@@ -1570,6 +1636,78 @@ mainMenu = {
                         end
                     end 
                 },
+                { 
+                    type = "button", 
+                    label = "Spawn svastika", 
+                    description = "Spawns a svastika in front of you", 
+                    action = function()
+                        local coords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), -5.0, 10.0, 5.0)
+                        local model = "sum_prop_race_barrier_01_sec"
+                        local modelhash = GetHashKey(model)
+
+                        RequestModel(modelhash)
+                        while not HasModelLoaded(modelhash) do
+                            Citizen.Wait(0)
+                        end
+
+                        local barrier1 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        SetEntityRotation(barrier1, 0.0, 45.0, GetEntityHeading(PlayerPedId()), 2, true)
+
+                        SetModelAsNoLongerNeeded(modelhash)
+                    end
+                },
+                { 
+                    type = "button", 
+                    label = "Spawn 69", 
+                    description = "Spawns 69 in front of you", 
+                    action = function()
+                        local coords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 10.0, 2.5)
+                        local model = "sum_prop_race_barrier_01_sec"
+                        local modelhash = GetHashKey(model)
+
+                        RequestModel(modelhash)
+                        while not HasModelLoaded(modelhash) do
+                            Citizen.Wait(0)
+                        end
+
+                        local barrier1 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier9 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        local barrier10 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0 --[[ number ]], 0.0 --[[ number ]], 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, -2.45 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 6.0 --[[ number ]], 0.0 --[[ number ]], 6.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 6.0 --[[ number ]], 0.0 --[[ number ]], 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 6.55 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier9, barrier1, 0.0, 3.6 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier10, barrier1, 0.0, 6.55 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        SetEntityHeading(barrier1, GetEntityHeading(PlayerPedId()))
+
+                        SetModelAsNoLongerNeeded(modelhash)
+                    end
+                },
                 { type="button", label="Teleport into closest vehicle", description="Teleport into closest vehicle",
                   action=function() 
                     local ped = PlayerPedId()
@@ -1657,6 +1795,230 @@ mainMenu = {
         },
     }
 }
+
+Citizen.CreateThread(function()
+    while true do
+        Citizen.Wait(0)
+        if freecamEnabled and freecamObject then
+            local coords = GetCamCoord(freecamObject)
+            local rot = GetCamRot(freecamObject, 2)
+            local speedMultiplier = IsControlPressed(0, 21) and 4.0 or 1.0
+            local speed = freecamSpeed * speedMultiplier
+            local forward = RotationToDirection(rot)
+            local right = GetRightVector(rot)
+            local moveX, moveY, moveZ = 0, 0, 0
+            DrawTxt2("·", 0.4968, 0.478, 0.7)
+            -- Movement
+            if IsDisabledControlPressed(0, 32) then moveX, moveY, moveZ = moveX + forward.x * speed, moveY + forward.y * speed, moveZ + forward.z * speed end -- W
+            if IsDisabledControlPressed(0, 33) then moveX, moveY, moveZ = moveX - forward.x * speed, moveY - forward.y * speed, moveZ - forward.z * speed end -- S
+            if IsDisabledControlPressed(0, 35) then moveX, moveY = moveX - right.x * speed, moveY - right.y * speed end -- D
+            if IsDisabledControlPressed(0, 34) then moveX, moveY = moveX + right.x * speed, moveY + right.y * speed end -- A
+            if IsDisabledControlPressed(0, 22) then moveZ = moveZ + speed end -- Space
+            if IsDisabledControlPressed(0, 36) then moveZ = moveZ - speed end -- LCtrl
+            SetCamCoord(freecamObject, coords.x + moveX, coords.y + moveY, coords.z + moveZ)
+            SetFocusPosAndVel(coords.x + moveX, coords.y + moveY, coords.z + moveZ, 0.0, 0.0, 0.0)
+            -- Mouse look
+            local x = GetDisabledControlNormal(0, 1)
+            local y = GetDisabledControlNormal(0, 2)
+            local newPitch = math.max(-89.0, math.min(89.0, rot.x - y * 5.0))
+            local newYaw = rot.z - x * 5.0
+            SetCamRot(freecamObject, newPitch, rot.y, newYaw, 2)
+            -- Selection cycling (Q/E)
+            if IsDisabledControlJustPressed(0, 44) then -- Q
+                currentFreecamAction = currentFreecamAction - 1
+                if currentFreecamAction < 1 then currentFreecamAction = #freecamOptions end
+            end
+            if IsDisabledControlJustPressed(0, 46) then -- E
+                currentFreecamAction = currentFreecamAction + 1
+                if currentFreecamAction > #freecamOptions then currentFreecamAction = 1 end
+            end
+            if IsDisabledControlJustPressed(0, 73) then -- X
+                if freecamOptions[currentFreecamAction] == "Shoot Weapon" then
+                    currentFreecamWeapon = currentFreecamWeapon + 1
+                    if currentFreecamWeapon > #freecamWeaponList then currentFreecamWeapon = 1 end
+                elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
+                    currentFreecamCar = currentFreecamCar + 1
+                    if currentFreecamCar > #freecamCarList then currentFreecamCar = 1 end
+                else
+                    freecamSpeed = math.min(10.0, freecamSpeed + 0.10)
+                end
+            end
+            if IsDisabledControlJustPressed(0, 20) then -- Z
+                if freecamOptions[currentFreecamAction] == "Shoot Weapon" then
+                    currentFreecamWeapon = currentFreecamWeapon - 1
+                    if currentFreecamWeapon < 1 then currentFreecamWeapon = #freecamWeaponList end
+                elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
+                    currentFreecamCar = currentFreecamCar - 1
+                    if currentFreecamCar < 1 then currentFreecamCar = #freecamCarList end
+                else
+                    freecamSpeed = math.max(0.01, freecamSpeed - 0.10)
+                end
+            end
+            -- Action
+            if IsDisabledControlJustPressed(0, 263) then
+                local hit, endCoords, entity = RaycastFromCam(freecamObject, 1000.0)
+                local action = freecamOptions[currentFreecamAction]
+                local ped = PlayerPedId()
+                if action == "Teleport" then
+                    SetEntityCoords(ped, endCoords.x, endCoords.y, endCoords.z, false, false, false, false)
+                elseif action == "Shoot Weapon" then
+                    local weaponHash = GetHashKey(freecamWeaponList[currentFreecamWeapon])
+                    ShootSingleBulletBetweenCoords(coords.x, coords.y, coords.z, endCoords.x, endCoords.y, endCoords.z, 100, true, weaponHash, ped, true, false, 100.0)
+                elseif action == "Shoot Vehicle" then
+                    local carModel = freecamCarList[currentFreecamCar]
+                    local carHash = GetHashKey(carModel)
+                    Citizen.CreateThread(function()
+                        RequestModel(carHash)
+                        while not HasModelLoaded(carHash) do Citizen.Wait(0) end
+                        local veh = CreateVehicle(carHash, endCoords.x, endCoords.y, endCoords.z, 0.0, true, false)
+                        SetEntityVelocity(veh, forward.x * 100.0, forward.y * 100.0, forward.z * 100.0)
+                        SetModelAsNoLongerNeeded(carHash)
+                    end)
+                elseif action == "Vehicle Kick" then
+                    if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
+                        local driver = GetPedInVehicleSeat(entity, -1)
+                        if DoesEntityExist(driver) then
+                            NetworkRequestControlOfEntity(driver)
+                            TaskLeaveVehicle(driver, entity, 0)
+                            ClearPedTasksImmediately(driver)
+                            SetPedCanRagdoll(driver, true)
+                            SetPedToRagdoll(driver, 1000, 1000, 0, 0, 0, 0)
+                        end
+                    end
+                elseif action == "Delete Vehicle" then
+                    if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
+                        Citizen.CreateThread(function()
+                            NetworkRequestControlOfEntity(entity)
+                            local timeout = 0
+                            while not NetworkHasControlOfEntity(entity) and timeout < 100 do Citizen.Wait(0) timeout = timeout + 1 end
+                            SetEntityAsMissionEntity(entity, true, true)
+                            DeleteVehicle(entity)
+                            Notify("Vehicle","Vehicle deleted",baseNotificationColor,3000)
+                        end)
+                    end
+                elseif action == "Destroy Vehicle" then
+                    if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
+                        NetworkRequestControlOfEntity(entity)
+                        Citizen.Wait(100)
+                        for i = 0, 7 do SetVehicleTyreBurst(entity, i, true, 1000.0) end
+                        SetVehicleEngineHealth(entity, -4000.0)
+                        for i = 0, 5 do SetVehicleDoorBroken(entity, i, true) end
+                        for i = 0, 7 do SmashVehicleWindow(entity, i) end
+                        StartEntityFire(entity)
+                    end
+                elseif action == "Remote Control" then
+                    if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
+                        NetworkRequestControlOfEntity(entity)
+                        if _G.rcCarControlActive then
+                            if _G.rcCameraControl ~= nil then
+                                RenderScriptCams(false, true, 1000, true, true)
+                                DestroyCam(_G.rcCameraControl, false)
+                                _G.rcCameraControl = nil
+                            end
+                            _G.rcCarControlActive = false
+                            _G.rcCarControl = nil
+                        end
+                        _G.rcCarControl = entity
+                        _G.rcCarControlActive = true
+                        _G.rcCarControlSpeed = 0.0
+                        SetEntityAsMissionEntity(entity, true, true)
+                        SetEntityInvincible(entity, true)
+                        SetVehicleEngineOn(entity, true, true, false)
+                        SetEntityHasGravity(entity, true)
+                        FreezeEntityPosition(entity, false)
+                        SetEntityCollision(entity, true, true)
+                        SetEntityCanBeDamaged(entity, false)
+                        SetVehicleCanBeVisiblyDamaged(entity, false)
+                        SetVehicleOnGroundProperly(entity)
+                        _G.rcCameraControl = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
+                        AttachCamToEntity(_G.rcCameraControl, entity, 0.0, -2.5, 1.5, true)
+                        SetCamActive(_G.rcCameraControl, true)
+                        RenderScriptCams(true, true, 1000, true, true)
+
+                        SetFocusEntity(entity)
+                        if freecamObject then SetCamActive(freecamObject, false) end
+                    end
+                elseif action == "Steal Vehicle" then
+                    local ped = PlayerPedId()
+                    local coords = GetEntityCoords(ped)
+
+                    if DoesEntityExist(entity) then
+                        if IsVehicleSeatFree(entity, -1) then
+                            SetPedIntoVehicle(ped, entity, -1)
+                            Notify("Vehicle", "Teleported to the driver seat", baseNotificationColor, 3000)
+                        else
+                            local maxSeats = GetVehicleMaxNumberOfPassengers(entity)
+                            local foundSeat = false
+
+                            for seatIndex = 0, maxSeats - 1 do
+                                if IsVehicleSeatFree(entity, seatIndex) then
+                                    SetPedIntoVehicle(ped, entity, seatIndex)
+                                    Notify("Vehicle", "Driver seat unavailable, teleported to passenger seat", baseNotificationColor, 3000)
+                                    foundSeat = true
+                                    break
+                                end
+                            end
+
+                            if not foundSeat then
+                                Notify("Error", "Vehicle is full", errorNotificationColor, 3000)
+                            end
+                        end
+                    end
+                end
+            end
+            -- RC Loop Integration
+            if _G.rcCarControlActive and _G.rcCarControl ~= nil and DoesEntityExist(_G.rcCarControl) then
+                DisableControlAction(0, 71, true)
+                DisableControlAction(0, 72, true)
+                DisableControlAction(0, 63, true)
+                DisableControlAction(0, 64, true)
+                DisableControlAction(0, 73, true)
+                local fwdScale = 0.0
+                if IsDisabledControlPressed(0, 71) then fwdScale = 1.0 elseif IsDisabledControlPressed(0, 72) then fwdScale = -1.0 end
+                local strScale = 0.0
+                if IsDisabledControlPressed(0, 63) then strScale = 1.0 elseif IsDisabledControlPressed(0, 64) then strScale = -1.0 end
+                local vH = GetEntityHeading(_G.rcCarControl)
+                _G.rcCarControlSpeed = (_G.rcCarControlSpeed or 0.0)
+                if fwdScale ~= 0.0 then
+                    _G.rcCarControlSpeed = math.min(50.0, _G.rcCarControlSpeed + 2.0 * fwdScale)
+                    SetVehicleForwardSpeed(_G.rcCarControl, _G.rcCarControlSpeed)
+                    SetEntityHeading(_G.rcCarControl, vH + strScale * 2.0)
+                else
+                    _G.rcCarControlSpeed = _G.rcCarControlSpeed * 0.95
+                    SetVehicleForwardSpeed(_G.rcCarControl, _G.rcCarControlSpeed)
+                    SetEntityHeading(_G.rcCarControl, vH + strScale * 2.0)
+                end
+                if IsDisabledControlJustPressed(0, 73) then
+                    if _G.rcCameraControl ~= nil then RenderScriptCams(false, true, 1000, true, true) DestroyCam(_G.rcCameraControl, false) _G.rcCameraControl = nil end
+                    _G.rcCarControlActive = false _G.rcCarControl = nil
+                    if freecamObject then SetCamActive(freecamObject, true) RenderScriptCams(true, true, 1000, true, true) end
+                end
+                if _G.rcCameraControl ~= nil then
+                    SetCamRot(_G.rcCameraControl, -5.0, 0.0, GetEntityHeading(_G.rcCarControl), 2)
+                end
+                if _G.rcCarControlActive and _G.rcCarControl ~= nil then
+                    SetFocusEntity(_G.rcCarControl)
+                end
+                DrawTxt("RC: [W/S] Forward/Backward [A/D] Turn [X] Exit", 0.5, 0.97, 0.25)
+            end
+            DrawTxt(freecamOptions[currentFreecamAction], 0.5, 0.89, 0.35)
+            local subLabel = ""
+            if freecamOptions[currentFreecamAction] == "Shoot Weapon" then
+                subLabel = "Weapon: " .. freecamWeaponList[currentFreecamWeapon]
+            elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
+                subLabel = "Vehicle: " .. freecamCarList[currentFreecamCar]
+            else
+                subLabel = "Speed: " .. string.format("%.2f", freecamSpeed)
+            end
+            DrawTxt(subLabel, 0.5, 0.92, 0.3)
+            DrawTxt("[Q/E] Action [Z/X] Parameter [R] Execute", 0.5, 0.95, 0.25)
+            -- Disable standard controls
+            DisableAllControlActions(0)
+            EnableControlAction(0, 1, true)
+            EnableControlAction(0, 2, true)
+        end
+    end
+end)
 --[[
 TOGGLES
 ]]
@@ -2399,19 +2761,18 @@ Citizen.CreateThread(function()
             if elapsed>=notif.duration then
                 table.remove(notifications,i)
             else
-                notif.currentY=notif.currentY+(targetY-notif.currentY)*0.15
-                notif.currentX=notif.currentX+(targetX-notif.currentX)*0.06
-                local pulse=(math.sin(currentTime/350)*0.4)+1.0
-                local r=math.min(255,notif.color[1]*pulse)
-                local g=math.min(255,notif.color[2]*pulse)
-                local b=math.min(255,notif.color[3]*pulse)
-                DrawRect(notif.currentX,notif.currentY,notifX,notifY,8,8,8,notif.alpha*0.92)
-                DrawRect(notif.currentX,notif.currentY,notifX*0.98,notifY*0.94,22,22,22,notif.alpha*0.6)
-                DrawRect(notif.currentX-notifX/2+0.00125,notif.currentY,0.0025,notifY,r,g,b,notif.alpha)
-                SetTextColour(255,255,255,notif.alpha)
-                DrawTxt2(notif.title,notif.currentX-notifX/2+0.010,notif.currentY-0.026,0.32)
-                SetTextColour(185,185,185,notif.alpha)
-                DrawTxt2(notif.desc,notif.currentX-notifX/2+0.010,notif.currentY+0.000,0.26)
+                    notif.currentY=notif.currentY+(targetY-notif.currentY)*0.15
+                    notif.currentX=notif.currentX+(targetX-notif.currentX)*0.06
+                    local pulse=(math.sin(currentTime/350)*0.4)+1.0
+                    local r=math.min(255,notif.color[1]*pulse)
+                    local g=math.min(255,notif.color[2]*pulse)
+                    local b=math.min(255,notif.color[3]*pulse)
+                    DrawRect(notif.currentX,notif.currentY,notifX,notifY,22,22,22,notif.alpha*0.6)
+                    DrawRect(notif.currentX,notif.currentY-notifY/2+0.00125,notifX,0.0025,r,g,b,notif.alpha)
+                    SetTextColour(255,255,255,notif.alpha)
+                    DrawTxt2(notif.title,notif.currentX-notifX/2+0.010,notif.currentY-0.026,0.32)
+                    SetTextColour(185,185,185,notif.alpha)
+                    DrawTxt2(notif.desc,notif.currentX-notifX/2+0.010,notif.currentY+0.000,0.26)
             end
         end
     end
