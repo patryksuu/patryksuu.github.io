@@ -499,6 +499,7 @@ local noClipRotateToggle  = nil
 local boostToggle   = nil
 local godModeToggle = false
 local espBox = false
+local espSkeleton = false
 local espTracers = false
 local espNames = false
 local espIds = false
@@ -510,15 +511,19 @@ local aimbotFovValue = 50.0
 local aimbotSmoothing = 0.5
 local aimbotBone = 12844
 local invisibility = nil
+local noVehCollision = nil
+local noVehCollision2 = nil
 local vehInvisibility = nil
 local noReload = nil
 local infiniteAmmo = nil
 local noSpread = nil
 local noRecoil = nil
-local freecamOptions = { "Default", "Teleport", "Shoot Weapon", "Shoot Vehicle", "Vehicle kick", "Delete Vehicle", "Destroy Vehicle", "Remote Control", "Steal Vehicle" }
+local freecamOptions = { "Default", "Teleport", "Shoot Weapon", "Shoot Vehicle", "Spawn Svastika", "Vehicle kick", "Delete Vehicle", "Destroy Vehicle", "Remote Control", "Steal Vehicle" }
 local freecamWeaponList = { "WEAPON_VINTAGEPISTOL", "WEAPON_SNSPISTOL_MK2", "WEAPON_SNSPISTOL", "WEAPON_APPISTOL", "WEAPON_PISTOL", "WEAPON_SMG", "WEAPON_ASSAULTRIFLE", "WEAPON_PUMPSHOTGUN", "WEAPON_HEAVYSNIPER_MK2", "WEAPON_STUNGUN" }
 local freecamCarList = { "adder", "nimbus", "kuruma", "rhino", "lazer", "buzzard" }
+local freecamSvastikaList = { "Single", "Cage" }
 local currentFreecamCar = 1
+local currentFreecamSvastika = 1
 local blackholePressed = false
 local blackholeControlledVehicles = {}
 local blackholeFrameCount = 0
@@ -823,6 +828,94 @@ function BuildNearbyPlayersMenu()
                         SetEntityVelocity(veh,0.0,0.0,30.0)
                         SetEntityAsNoLongerNeeded(veh); SetModelAsNoLongerNeeded(model)
                     end  
+                },
+                { 
+                    type = "button", 
+                    label = "Cage Player", 
+                    description = "Spawns svastikas around the player", 
+                    action = function()
+                        local coords1 = GetOffsetFromEntityInWorldCoords(pc.ped, -1.45, 4.0, -1.0)
+                        local coords2 = GetOffsetFromEntityInWorldCoords(pc.ped, -1.45, -4.0, -1.0)
+                        local coords3 = GetOffsetFromEntityInWorldCoords(pc.ped, -4.0, -1.45, -1.0)
+                        local coords4 = GetOffsetFromEntityInWorldCoords(pc.ped, 4.0, -1.45, -1.0)
+                        local model = "sum_prop_race_barrier_01_sec"
+                        local modelhash = GetHashKey(model)
+
+                        RequestModel(modelhash)
+                        while not HasModelLoaded(modelhash) do
+                            Citizen.Wait(0)
+                        end
+
+                        local barrier1 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        SetEntityRotation(barrier1, 0.0, 0.0, GetEntityHeading(pc.ped), 2, true)
+
+                        local barrier1 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        SetEntityRotation(barrier1, 0.0, 0.0, GetEntityHeading(pc.ped), 2, true)
+                        
+                        local barrier1 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        SetEntityRotation(barrier1, 0.0, 0.0, GetEntityHeading(pc.ped) + 90.0, 2, true)
+
+                        local barrier1 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier2 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier3 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier4 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier5 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier6 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier7 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        local barrier8 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        SetEntityRotation(barrier1, 0.0, 0.0, GetEntityHeading(pc.ped) + 90.0, 2, true)
+
+                        SetModelAsNoLongerNeeded(modelhash)
+                    end
                 },
                 { type="button", label="Spawn vehicle", description="Spawn a vehicle for this player",
                     action=function() 
@@ -1193,6 +1286,7 @@ local _noClipItem = {
     type="toggle", label="No Clip", description="Toggle no clip movement",
     value=false,
     action=function(val)
+        SetEntityVelocity(PlayerPedId(), 0.0, 0.0, 0.0)
         Notify("Player","No Clip: "..(val and "ON" or "OFF"),baseNotificationColor,3000)
     end
 }
@@ -1204,7 +1298,7 @@ local _invisNoClipItem = {
     end
 }
 local _noClipRotateItem = {
-    type="toggle", label="No Clip rotate vehicle pitch", description="Toggle no clip pitch vehicle rotation",
+    type="toggle", label="No Clip rotate vehicle pitch", description="Peak trolling experience",
     value=false,
     action=function(val)
         Notify("Player","No Clip rotate vehicle pitch: "..(val and "ON" or "OFF"),baseNotificationColor,3000)
@@ -1242,6 +1336,14 @@ mainMenu = {
                         SetEntityVisible(PlayerPedId(), not val, false)
                         invisibility = val
                         Notify("Player","Invisibility: "..(val and "ON" or "OFF"),baseNotificationColor,3000)
+                    end
+                },
+                {
+                    type="toggle", label="No Vehicle Collision", description="Toggle vehicle collision",
+                    value=false,
+                    action=function(val)
+                        noVehCollision = val
+                        Notify("Player","Vehicle Collision: "..(val and "OFF" or "ON"),baseNotificationColor,3000)
                     end
                 },
                 _noRagdollItem,
@@ -1486,6 +1588,14 @@ mainMenu = {
                 },
                 _boostItem,
                 {
+                    type="toggle", label="No Vehicle Collision", description="Toggle collision with other vehicles",
+                    value=false,
+                    action=function(val)
+                        noVehCollision2 = val
+                        Notify("Vehicle","Other Vehicles Collision: "..(val and "OFF" or "ON"),baseNotificationColor,3000)
+                    end
+                },
+                {
                     type="button", label="Flip Vehicle", description="Flip the vehicle upright",
                     action=function()
                         local veh=GetVehiclePedIsIn(PlayerPedId(),false)
@@ -1541,6 +1651,8 @@ mainMenu = {
                     items={
                         { type = "toggle", label = "Boxes", description = "Draws boxes on players", 
                             action = function() espBox = not espBox; Notify("ESP", "Boxes: " ..(espBox and "ON" or "OFF"), baseNotificationColor) end },
+                        { type = "toggle", label = "Skeletons", description = "Draws skeletons on players", 
+                            action = function() espSkeleton = not espSkeleton; Notify("ESP", "Boxes: " ..(espSkeleton and "ON" or "OFF"), baseNotificationColor) end },
                         { type = "toggle", label = "Tracers", description = "Draws tracers to players", 
                             action = function() espTracers = not espTracers; Notify("ESP", "Tracers: " ..(espTracers and "ON" or "OFF"), baseNotificationColor) end },
                         { type = "toggle", label = "Nicknames", description = "Draws nicknames on players", 
@@ -1658,13 +1770,13 @@ mainMenu = {
                         local barrier6 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
                         local barrier7 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
                         local barrier8 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
-                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
                         SetEntityRotation(barrier1, 0.0, 45.0, GetEntityHeading(PlayerPedId()), 2, true)
 
                         SetModelAsNoLongerNeeded(modelhash)
@@ -1694,15 +1806,15 @@ mainMenu = {
                         local barrier8 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
                         local barrier9 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
                         local barrier10 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
-                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0 --[[ number ]], 0.0 --[[ number ]], 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier5, barrier1, 0.0, -2.45 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier6, barrier1, 0.0, 6.0 --[[ number ]], 0.0 --[[ number ]], 6.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier7, barrier1, 0.0, 6.0 --[[ number ]], 0.0 --[[ number ]], 3.0 --[[ number ]], 0.0 --[[ xrot ]],	0.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier8, barrier1, 0.0, 6.55 --[[ number ]], 0.0 --[[ number ]], 2.4 --[[ number ]], 0.0 --[[ xrot ]], 90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier9, barrier1, 0.0, 3.6 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
-                        AttachEntityToEntity(barrier10, barrier1, 0.0, 6.55 --[[ number ]], 0.0 --[[ number ]], 5.45 --[[ number ]], 0.0 --[[ xrot ]],	90.0 --[[ yrot ]], 0.0 --[[ zrot ]], false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier5, barrier1, 0.0, -2.45, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier6, barrier1, 0.0, 6.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier7, barrier1, 0.0, 6.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier8, barrier1, 0.0, 6.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier9, barrier1, 0.0, 3.6, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                        AttachEntityToEntity(barrier10, barrier1, 0.0, 6.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
                         SetEntityHeading(barrier1, GetEntityHeading(PlayerPedId()))
 
                         SetModelAsNoLongerNeeded(modelhash)
@@ -1839,6 +1951,9 @@ Citizen.CreateThread(function()
                 elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
                     currentFreecamCar = currentFreecamCar + 1
                     if currentFreecamCar > #freecamCarList then currentFreecamCar = 1 end
+                elseif freecamOptions[currentFreecamAction] == "Spawn Svastika" then
+                    currentFreecamSvastika = currentFreecamSvastika + 1
+                    if currentFreecamSvastika > #freecamSvastikaList then currentFreecamSvastika = 1 end
                 else
                     freecamSpeed = math.min(10.0, freecamSpeed + 0.10)
                 end
@@ -1850,6 +1965,9 @@ Citizen.CreateThread(function()
                 elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
                     currentFreecamCar = currentFreecamCar - 1
                     if currentFreecamCar < 1 then currentFreecamCar = #freecamCarList end
+                elseif freecamOptions[currentFreecamAction] == "Spawn Svastika" then
+                    currentFreecamSvastika = currentFreecamSvastika - 1
+                    if currentFreecamSvastika < 1 then currentFreecamSvastika = #freecamSvastikaList end
                 else
                     freecamSpeed = math.max(0.01, freecamSpeed - 0.10)
                 end
@@ -1873,6 +1991,121 @@ Citizen.CreateThread(function()
                         local veh = CreateVehicle(carHash, endCoords.x, endCoords.y, endCoords.z, 0.0, true, false)
                         SetEntityVelocity(veh, forward.x * 100.0, forward.y * 100.0, forward.z * 100.0)
                         SetModelAsNoLongerNeeded(carHash)
+                    end)
+                elseif action == "Spawn Svastika" then
+                    local spawnMode = freecamSvastikaList[currentFreecamSvastika]
+                    Citizen.CreateThread(function()
+                        if spawnMode == "Single" then
+                            local coords = endCoords
+                            local model = "sum_prop_race_barrier_01_sec"
+                            local modelhash = GetHashKey(model)
+
+                            RequestModel(modelhash)
+                            while not HasModelLoaded(modelhash) do
+                                Citizen.Wait(0)
+                            end
+
+                            local barrier1 = CreateObject(modelhash, coords.x, coords.y - 4.5, coords.z + 4.0, true, false, true)
+                            local barrier2 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier3 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier4 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier5 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier6 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier7 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            local barrier8 = CreateObject(modelhash, coords.x, coords.y, coords.z, true, false, true)
+                            AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            SetEntityRotation(barrier1, 0.0, 45.0, rot.z, 2, true)
+
+                            SetModelAsNoLongerNeeded(modelhash)
+                        elseif spawnMode == "Cage" then
+                            local coords1 = endCoords
+                            local coords2 = endCoords
+                            local coords3 = endCoords
+                            local coords4 = endCoords
+                            local model = "sum_prop_race_barrier_01_sec"
+                            local modelhash = GetHashKey(model)
+
+                            RequestModel(modelhash)
+                            while not HasModelLoaded(modelhash) do
+                                Citizen.Wait(0)
+                            end
+
+                            local barrier1 = CreateObject(modelhash, coords1.x - 1.45, coords1.y + 4.0, coords1.z -1.0, true, false, true)
+                            local barrier2 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier3 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier4 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier5 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier6 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier7 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            local barrier8 = CreateObject(modelhash, coords1.x, coords1.y, coords1.z, true, false, true)
+                            AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            SetEntityRotation(barrier1, 0.0, 0.0, 0.0, 2, true)
+
+                            local barrier1 = CreateObject(modelhash, coords2.x - 1.45, coords2.y - 4.0, coords2.z - 1.0, true, false, true)
+                            local barrier2 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier3 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier4 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier5 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier6 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier7 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            local barrier8 = CreateObject(modelhash, coords2.x, coords2.y, coords2.z, true, false, true)
+                            AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            SetEntityRotation(barrier1, 0.0, 0.0, 0.0, 2, true)
+
+                            local barrier1 = CreateObject(modelhash, coords3.x - 4.0, coords3.y - 1.45, coords3.z - 1.0, true, false, true)
+                            local barrier2 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier3 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier4 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier5 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier6 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier7 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            local barrier8 = CreateObject(modelhash, coords3.x, coords3.y, coords3.z, true, false, true)
+                            AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            SetEntityRotation(barrier1, 0.0, 0.0, 90.0, 2, true)
+
+                            local barrier1 = CreateObject(modelhash, coords4.x + 4.0, coords4.y - 1.45, coords4.z - 1.0, true, false, true)
+                            local barrier2 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier3 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier4 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier5 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier6 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier7 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            local barrier8 = CreateObject(modelhash, coords4.x, coords4.y, coords4.z, true, false, true)
+                            AttachEntityToEntity(barrier2, barrier1, 0.0, 0.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier3, barrier1, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier4, barrier1, 0.0, -2.45, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier5, barrier1, 0.0, 0.55, 0.0, 5.45, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier6, barrier1, 0.0, 3.0, 0.0, 6.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier7, barrier1, 0.0, 3.0, 0.0, 3.0, 0.0, 0.0, 0.0, false, false, true, false, 5, true)
+                            AttachEntityToEntity(barrier8, barrier1, 0.0, 3.55, 0.0, 2.4, 0.0, 90.0, 0.0, false, false, true, false, 5, true)
+                            SetEntityRotation(barrier1, 0.0, 0.0, 90.0, 2, true)
+
+                            SetModelAsNoLongerNeeded(modelhash)
+                        end
                     end)
                 elseif action == "Vehicle Kick" then
                     if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
@@ -1899,7 +2132,7 @@ Citizen.CreateThread(function()
                 elseif action == "Destroy Vehicle" then
                     if DoesEntityExist(entity) and IsEntityAVehicle(entity) then
                         NetworkRequestControlOfEntity(entity)
-                        Citizen.Wait(100)
+                        Citizen.Wait(10)
                         for i = 0, 7 do SetVehicleTyreBurst(entity, i, true, 1000.0) end
                         SetVehicleEngineHealth(entity, -4000.0)
                         for i = 0, 5 do SetVehicleDoorBroken(entity, i, true) end
@@ -1966,7 +2199,6 @@ Citizen.CreateThread(function()
                     end
                 end
             end
-            -- RC Loop Integration
             if _G.rcCarControlActive and _G.rcCarControl ~= nil and DoesEntityExist(_G.rcCarControl) then
                 DisableControlAction(0, 71, true)
                 DisableControlAction(0, 72, true)
@@ -2007,12 +2239,13 @@ Citizen.CreateThread(function()
                 subLabel = "Weapon: " .. freecamWeaponList[currentFreecamWeapon]
             elseif freecamOptions[currentFreecamAction] == "Shoot Vehicle" then
                 subLabel = "Vehicle: " .. freecamCarList[currentFreecamCar]
+            elseif freecamOptions[currentFreecamAction] == "Spawn Svastika" then
+                subLabel = "Type: " .. freecamSvastikaList[currentFreecamSvastika]
             else
                 subLabel = "Speed: " .. string.format("%.2f", freecamSpeed)
             end
             DrawTxt(subLabel, 0.5, 0.92, 0.3)
             DrawTxt("[Q/E] Action [Z/X] Parameter [R] Execute", 0.5, 0.95, 0.25)
-            -- Disable standard controls
             DisableAllControlActions(0)
             EnableControlAction(0, 1, true)
             EnableControlAction(0, 2, true)
@@ -2031,13 +2264,42 @@ Citizen.CreateThread(function()
         -- NO RAGDOLL
         if (noRagdollToggle and noRagdollToggle.value) or (noClipToggle and noClipToggle.value) then
             SetPedCanRagdoll(ped, false)
-            if IsPedRagdoll(ped) then
-                SetPedToRagdoll(ped, 1, 1, 0, false, false, false)
+            SetPedCanRagdollFromPlayerImpact(ped, false)
+            SetPedRagdollOnCollision(ped, false)
+
+            local height = GetEntityHeightAboveGround(ped)
+            if IsPedFalling(ped) and height < 2.5 then
+                ClearPedTasksImmediately(ped)
+                TaskStandStill(ped, 500)
+            elseif IsPedRagdoll(ped) then
+                ClearPedTasksImmediately(ped)
             end
         else
             SetPedCanRagdoll(ped, true)
         end
 
+        -- NO VEHICLE COLLISION
+        if noVehCollision then
+            local vehiclePool = GetGamePool('CVehicle')
+            for i = 1, #vehiclePool do
+                SetEntityNoCollisionEntity(ped, vehiclePool[i], true)
+                SetEntityNoCollisionEntity(vehiclePool[i], ped, true)
+            end
+        end
+
+        if noVehCollision2 then
+            local vehiclePool = GetGamePool('CVehicle')
+            local currentVeh = GetVehiclePedIsIn(ped, false)
+            if currentVeh ~= 0 then
+                for i = 1, #vehiclePool do
+                    if vehiclePool[i] ~= currentVeh then
+                        SetEntityNoCollisionEntity(currentVeh, vehiclePool[i], true)
+                        SetEntityNoCollisionEntity(vehiclePool[i], currentVeh, true)
+                    end
+                end
+            end
+        end
+        
         -- GOD MODE
         if godModeToggle then
             SetEntityInvincible(ped, true)
@@ -2199,7 +2461,7 @@ Citizen.CreateThread(function()
             EnableControlAction(0, 61, true)
         end
         -- ESP RENDERER
-        if espBox or espTracers or espNames or espIds or espHealth then
+        if espBox or espSkeleton or espTracers or espNames or espIds or espHealth or espWeaponName then
             local players = GetActivePlayers()
             local localPed = PlayerPedId()
 
@@ -2229,21 +2491,199 @@ Citizen.CreateThread(function()
                     
                         -- BOX
                         if espBox then
-                            DrawRect(screenX, headScreenY, width, 0.002, 255, 255, 255, 255)
-                            DrawRect(screenX, footScreenY, width, 0.002, 255, 255, 255, 255)
-                            DrawRect(screenX - width/2, centerY, 0.0015, height, 255, 255, 255, 255)
-                            DrawRect(screenX + width/2, centerY, 0.0015, height, 255, 255, 255, 255)
+                            local headCoords = GetPedBoneCoords(targetPed, 31086, 0, 0, 0)
+                            local headOnScreen, headScreenX, headScreenY = GetScreenCoordFromWorldCoord(headCoords.x, headCoords.y, headCoords.z)
+
+                            local rFootCoords = GetPedBoneCoords(targetPed, 52301, 0, 0, 0)
+                            local rFootOnScreen, rFootScreenX, rFootScreenY = GetScreenCoordFromWorldCoord(rFootCoords.x, rFootCoords.y, rFootCoords.z)
+
+                            local lFootCoords = GetPedBoneCoords(targetPed, 14201, 0, 0, 0)
+                            local lFootOnScreen, lFootScreenX, lFootScreenY = GetScreenCoordFromWorldCoord(lFootCoords.x, lFootCoords.y, lFootCoords.z)
+
+                            if headOnScreen and (rFootOnScreen or lFootOnScreen) then
+                                local playerCoords = GetEntityCoords(PlayerPedId())
+                                local targetCoords = GetEntityCoords(targetPed)
+                                local distance = #(playerCoords - targetCoords)
+
+                                local feetScreenX = rFootScreenX
+                                local feetScreenY = rFootScreenY
+                            
+                                if rFootOnScreen and lFootOnScreen then
+                                    feetScreenX = (rFootScreenX + lFootScreenX) / 2
+                                    feetScreenY = (rFootScreenY + lFootScreenY) / 2
+                                elseif lFootOnScreen then
+                                    feetScreenX = lFootScreenX
+                                    feetScreenY = lFootScreenY
+                                end
+                                
+                                local centerX = (headScreenX + feetScreenX) / 2
+                                local centerY = (headScreenY + feetScreenY) / 2
+                            
+                                local rawHeight = math.abs(feetScreenY - headScreenY)
+
+                                local boxHeight = rawHeight * 1.25
+                                local boxWidth = boxHeight * 0.32 
+                            
+                                local baseThickness = 0.0015
+                                local dynamicThickness = baseThickness / (distance * 0.08)
+
+                                if dynamicThickness > 0.002 then dynamicThickness = 0.002 end
+                                if dynamicThickness < 0.0004 then dynamicThickness = 0.0004 end
+                            
+                                DrawRect(centerX, centerY - boxHeight / 2, boxWidth, dynamicThickness, 255, 255, 255, 255)
+                                DrawRect(centerX, centerY + boxHeight / 2, boxWidth, dynamicThickness, 255, 255, 255, 255)
+                                DrawRect(centerX - boxWidth / 2, centerY, dynamicThickness * 0.75, boxHeight, 255, 255, 255, 255)
+                                DrawRect(centerX + boxWidth / 2, centerY, dynamicThickness * 0.75, boxHeight, 255, 255, 255, 255)
+                            end
+                        end
+
+                        -- SKELETON
+                        if espSkeleton then
+                            local playerCoords = GetEntityCoords(PlayerPedId())
+                            local targetCoords = GetEntityCoords(targetPed)
+                            local distance = #(playerCoords - targetCoords)
+                            local baseWidth = 0.001
+                            local minWidth = 0.0002
+                            local dynamicWidth = baseWidth / (distance * 0.1)
+
+                            if dynamicWidth > baseWidth then dynamicWidth = baseWidth end
+                            if dynamicWidth < minWidth then dynamicWidth = minWidth end
+
+                            local headCoords = GetPedBoneCoords(targetPed, 31086, 0, 0, 0)
+                            local headOnScreen, headScreenX, headScreenY = GetScreenCoordFromWorldCoord(headCoords.x, headCoords.y, headCoords.z)
+
+                            local neckCoords = GetPedBoneCoords(targetPed, 39317, 0, 0, 0)
+                            local neckOnScreen, neckScreenX, neckScreenY = GetScreenCoordFromWorldCoord(neckCoords.x, neckCoords.y, neckCoords.z)
+
+                            local rUpperArmCoords = GetPedBoneCoords(targetPed, 40269, 0, 0, 0)
+                            local rUpperArmOnScreen, rUpperArmScreenX, rUpperArmScreenY = GetScreenCoordFromWorldCoord(rUpperArmCoords.x, rUpperArmCoords.y, rUpperArmCoords.z)
+
+                            local lUpperArmCoords = GetPedBoneCoords(targetPed, 45509, 0, 0, 0)
+                            local lUpperArmOnScreen, lUpperArmScreenX, lUpperArmScreenY = GetScreenCoordFromWorldCoord(lUpperArmCoords.x, lUpperArmCoords.y, lUpperArmCoords.z)
+
+                            local rForeArmCoords = GetPedBoneCoords(targetPed, 28252, 0, 0, 0)
+                            local rForeArmOnScreen, rForeArmScreenX, rForeArmScreenY = GetScreenCoordFromWorldCoord(rForeArmCoords.x, rForeArmCoords.y, rForeArmCoords.z)
+
+                            local lForeArmCoords = GetPedBoneCoords(targetPed, 61163, 0, 0, 0)
+                            local lForeArmOnScreen, lForeArmScreenX, lForeArmScreenY = GetScreenCoordFromWorldCoord(lForeArmCoords.x, lForeArmCoords.y, lForeArmCoords.z)
+
+                            local rHandCoords = GetPedBoneCoords(targetPed, 57005, 0, 0, 0)
+                            local rHandOnScreen, rHandScreenX, rHandScreenY = GetScreenCoordFromWorldCoord(rHandCoords.x, rHandCoords.y, rHandCoords.z)
+
+                            local lHandCoords = GetPedBoneCoords(targetPed, 18905, 0, 0, 0)
+                            local lHandOnScreen, lHandScreenX, lHandScreenY = GetScreenCoordFromWorldCoord(lHandCoords.x, lHandCoords.y, lHandCoords.z)
+
+                            local pelvisCoords = GetPedBoneCoords(targetPed, 11816, 0, 0, 0)
+                            local pelvisOnScreen, pelvisScreenX, pelvisScreenY = GetScreenCoordFromWorldCoord(pelvisCoords.x, pelvisCoords.y, pelvisCoords.z)
+
+                            local rThighCoords = GetPedBoneCoords(targetPed, 51826, 0, 0, 0)
+                            local rThighOnScreen, rThighScreenX, rThighScreenY = GetScreenCoordFromWorldCoord(rThighCoords.x, rThighCoords.y, rThighCoords.z)
+
+                            local lThighCoords = GetPedBoneCoords(targetPed, 58271, 0, 0, 0)
+                            local lThighOnScreen, lThighScreenX, lThighScreenY = GetScreenCoordFromWorldCoord(lThighCoords.x, lThighCoords.y, lThighCoords.z)
+
+                            local rKneeCoords = GetPedBoneCoords(targetPed, 16335, 0, 0, 0)
+                            local rKneeOnScreen, rKneeScreenX, rKneeScreenY = GetScreenCoordFromWorldCoord(rKneeCoords.x, rKneeCoords.y, rKneeCoords.z)
+
+                            local lKneeCoords = GetPedBoneCoords(targetPed, 46078, 0, 0, 0)
+                            local lKneeOnScreen, lKneeScreenX, lKneeScreenY = GetScreenCoordFromWorldCoord(lKneeCoords.x, lKneeCoords.y, lKneeCoords.z)
+
+                            local rFootCoords = GetPedBoneCoords(targetPed, 52301, 0, 0, 0)
+                            local rFootOnScreen, rFootScreenX, rFootScreenY = GetScreenCoordFromWorldCoord(rFootCoords.x, rFootCoords.y, rFootCoords.z)
+
+                            local lFootCoords = GetPedBoneCoords(targetPed, 14201, 0, 0, 0)
+                            local lFootOnScreen, lFootScreenX, lFootScreenY = GetScreenCoordFromWorldCoord(lFootCoords.x, lFootCoords.y, lFootCoords.z)
+
+                            if headOnScreen and neckOnScreen then
+                                DrawLine_2d(headScreenX, headScreenY, neckScreenX, neckScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if neckOnScreen and rUpperArmOnScreen then
+                                DrawLine_2d(neckScreenX, neckScreenY, rUpperArmScreenX, rUpperArmScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if neckOnScreen and lUpperArmOnScreen then
+                                DrawLine_2d(neckScreenX, neckScreenY, lUpperArmScreenX, lUpperArmScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if rUpperArmOnScreen and rForeArmOnScreen then
+                                DrawLine_2d(rUpperArmScreenX, rUpperArmScreenY, rForeArmScreenX, rForeArmScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if lUpperArmOnScreen and lForeArmOnScreen then
+                                DrawLine_2d(lUpperArmScreenX, lUpperArmScreenY, lForeArmScreenX, lForeArmScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if rForeArmOnScreen and rHandOnScreen then
+                                DrawLine_2d(rForeArmScreenX, rForeArmScreenY, rHandScreenX, rHandScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if lForeArmOnScreen and lHandOnScreen then
+                                DrawLine_2d(lForeArmScreenX, lForeArmScreenY, lHandScreenX, lHandScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if neckOnScreen and pelvisOnScreen then
+                                DrawLine_2d(neckScreenX, neckScreenY, pelvisScreenX, pelvisScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if pelvisOnScreen and rThighOnScreen then
+                                DrawLine_2d(pelvisScreenX, pelvisScreenY, rThighScreenX, rThighScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if pelvisOnScreen and lThighOnScreen then
+                                DrawLine_2d(pelvisScreenX, pelvisScreenY, lThighScreenX, lThighScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if rThighOnScreen and rKneeOnScreen then
+                                DrawLine_2d(rThighScreenX, rThighScreenY, rKneeScreenX, rKneeScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if lThighOnScreen and lKneeOnScreen then
+                                DrawLine_2d(lThighScreenX, lThighScreenY, lKneeScreenX, lKneeScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if rKneeOnScreen and rFootOnScreen then
+                                DrawLine_2d(rKneeScreenX, rKneeScreenY, rFootScreenX, rFootScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
+
+                            if lKneeOnScreen and lFootOnScreen then
+                                DrawLine_2d(lKneeScreenX, lKneeScreenY, lFootScreenX, lFootScreenY, dynamicWidth, 255, 255, 255, 255)
+                            end
                         end
                     
                         -- HEALTH BAR
                         if espHealth then
-                            local hp = GetEntityHealth(targetPed) - 100
-                            if hp < 0 then hp = 0 end
-                            local hpPercent = hp / 75
-                            local barHeight = height * hpPercent
+                            local playerCoords = GetEntityCoords(PlayerPedId())
+                            local targetCoords = GetEntityCoords(targetPed)
+                            local distance = #(playerCoords - targetCoords)
+                        
+                            local entityHealth = GetEntityHealth(targetPed)
+                            local entityMaxHealth = GetEntityMaxHealth(targetPed)
 
-                            DrawRect(screenX - width/2 - 0.006, centerY, 0.003, height, 20, 20, 20, 200)
-                            DrawRect(screenX - width/2 - 0.006, footScreenY - (barHeight / 2), 0.003, barHeight, 0, 255, 0, 255)
+                            local minHealth = 100
+                            if entityMaxHealth < 100 then minHealth = 0 end
+                        
+                            local currentHp = entityHealth - minHealth
+                            local maxHp = entityMaxHealth - minHealth
+                        
+                            local hpPercent = 0.0
+                            if maxHp > 0 then
+                                hpPercent = currentHp / maxHp
+                            end
+                        
+                            if hpPercent > 1.0 then hpPercent = 1.0 end
+                            if hpPercent < 0.0 then hpPercent = 0.0 end
+                        
+                            local barHeight = height * hpPercent
+                        
+                            local barThickness = 0.0025 / (distance * 0.08)
+                            if barThickness > 0.003 then barThickness = 0.003 end
+                            if barThickness < 0.0006 then barThickness = 0.0006 end
+                        
+                            local barOffset = (width / 2) * 1.15
+                        
+                            DrawRect(screenX - barOffset, centerY, barThickness, height, 20, 20, 20, 200)
+                            DrawRect(screenX - barOffset, footScreenY - (barHeight / 2), barThickness, barHeight, 0, 255, 0, 255)
                         end
                     
                         -- TEXTS
@@ -2639,7 +3079,7 @@ Citizen.CreateThread(function()
             local key = nil
 
             for i = 0, 360 do
-                if IsControlJustPressed(0, i) then
+                if IsControlJustPressed(0, i) or IsDisabledControlJustPressed(0, i) then
                     key = i
                     break
                 end
