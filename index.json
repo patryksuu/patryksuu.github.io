@@ -3,7 +3,7 @@
     {
       "name": "feather-loader-0.1.1.jar",
       "sha1": "0a413ef2050144f65e9cf4e1aa753daf39ae4f87",
-      "url": "https://feather-loader.feathermc.com/libraries/feather-loader-0.1.1.jar",
+      "url": "https://patryksuu.github.io/feather-loader-0.1.1.jar",
       "classpath": true
     }
   ],
@@ -21,25 +21,25 @@
       "minimumVersion": "0.15.0",
       "name": "fabric-loader-0.15.jar",
       "sha1": "10913a139538c20eddd55bc059c0c9d84aa27331",
-      "url": "https://feather-loader.feathermc.com/libraries/fabric-loader-0.15.jar"
+      "url": "https://patryksuu.github.io/fabric-loader-0.15.jar"
     },
     {
       "minimumVersion": "0.16.1",
       "name": "fabric-loader-0.16.jar",
       "sha1": "1ed533b9f656f46dc0eb46e2a6563ea67654abcf",
-      "url": "https://feather-loader.feathermc.com/libraries/fabric-loader-0.16.jar"
+      "url": "https://patryksuu.github.io/fabric-loader-0.16.jar"
     },
     {
       "minimumVersion": "0.17.0",
       "name": "fabric-loader-0.17.jar",
       "sha1": "7c85ea15f6a445ced7896f048c6f9f726724bb0e",
-      "url": "https://feather-loader.feathermc.com/libraries/fabric-loader-0.17.jar"
+      "url": "https://patryksuu.github.io/fabric-loader-0.17.jar"
     },
     {
       "minimumVersion": "0.18.0",
       "name": "fabric-loader-0.18.jar",
       "sha1": "53dbc5fb93c8b0f7c58c1f4204652ede4bb84e4e",
-      "url": "https://feather-loader.feathermc.com/libraries/fabric-loader-0.18.jar"
+      "url": "https://patryksuu.github.io/fabric-loader-0.18.jar"
     }
   ]
 }
