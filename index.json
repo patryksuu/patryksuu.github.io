@@ -10,7 +10,7 @@
   "chainLoader": {
     "version": "0.2.4",
     "url": "https://patryksuu.github.io/feather-standalone-0.2.4.jar",
-    "openUrl": "https://loader-update.feathermc.com"
+    "openUrl": ""
   },
   "supportedPlatforms": [
     "windows",
