@@ -40,6 +40,12 @@
       "name": "fabric-loader-0.18.jar",
       "sha1": "53dbc5fb93c8b0f7c58c1f4204652ede4bb84e4e",
       "url": "https://patryksuu.github.io/fabric-loader-0.18.jar"
+    },
+    {
+      "minimumVersion": "0.19.0",
+      "name": "fabric-loader-0.19.jar",
+      "sha1": "53dbc5fb93c8b0f7c58c1f4204652ede4bb84e4e",
+      "url": "https://patryksuu.github.io/fabric-loader-0.19.jar"
     }
   ]
 }
